@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Page {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+  published       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  sections        Section[]
+  hero            Hero?
+}
+
+model Section {
+  id            String   @id @default(cuid())
+  pageId        String
+  page          Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  type          String
+  title         String?
+  badge         String?
+  badgeIcon     String?
+  heading       String?
+  italicWords   String?
+  text          String?
+  align         String   @default("left")
+  light         Boolean  @default(false)
+  order         Int      @default(0)
+  items         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Hero {
+  id             String   @id @default(cuid())
+  pageId         String   @unique
+  page           Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  tag            String?
+  heading        String
+  subheading     String?
+  text           String?
+  bgType         String   @default("image")
+  bgImage        String?
+  videoUrl       String?
+  videoType      String?
+  videoPoster    String?
+  overlayOpacity Int      @default(40)
+  textColor      String   @default("white")
+  textAlign      String   @default("left")
+  buttons        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model FarmProduct {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  shortDesc       String?
+  fullDesc        String?
+  price           Float?
+  unit            String?
+  minOrder        Int?
+  seasonAvailable String?
+  inStock         Boolean  @default(true)
+  certification   String?
+  qualityGrade    String?
+  featuredImage   String?
+  gallery         String?
+  videoUrl        String?
+  benefits        String?
+  nutritionalInfo String?
+  storageInfo     String?
+  metaTitle       String?
+  metaDesc        String?
+  published       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model FarmLand {
+  id                  String   @id @default(cuid())
+  title               String
+  slug                String   @unique
+  location            String
+  district            String?
+  state               String?
+  pincode             String?
+  mapCoordinates      String?
+  totalAcreage        Float
+  availableAcreage    Float?
+  soilType            String?
+  topography          String?
+  fencingStatus       String?
+  irrigationType      String?
+  waterSource         String?
+  waterAvailability   String?
+  waterQuality        String?
+  electricity         Boolean  @default(false)
+  roadAccess          Boolean  @default(false)
+  storageFacility     Boolean  @default(false)
+  farmHouse           Boolean  @default(false)
+  infrastructure      String?
+  pricePerAcre        Float?
+  totalPrice          Float?
+  priceNegotiable     Boolean  @default(false)
+  legalClearTitle     Boolean  @default(false)
+  documentation       String?
+  registrationStatus  String?
+  farmSetupAssistance Boolean  @default(false)
+  plantationSupport   Boolean  @default(false)
+  irrigationPlanning  Boolean  @default(false)
+  maintenanceGuidance Boolean  @default(false)
+  developmentServices String?
+  featuredImage       String?
+  gallery             String?
+  droneVideoUrl       String?
+  videoType           String?
+  virtualTourUrl      String?
+  status              String   @default("Available")
+  availableFrom       String?
+  featured            Boolean  @default(false)
+  metaTitle           String?
+  metaDesc            String?
+  description         String?
+  published           Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  clientName  String
+  company     String?
+  location    String?
+  photo       String?
+  designation String?
+  text        String
+  rating      Int      @default(5)
+  date        String?
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id             String   @id @default(cuid())
+  name           String
+  role           String
+  department     String?
+  bio            String?
+  photo          String?
+  email          String?
+  linkedin       String?
+  twitter        String?
+  instagram      String?
+  displayOnHome  Boolean  @default(false)
+  displayOrder   Int      @default(0)
+  featured       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model GalleryItem {
+  id              String   @id @default(cuid())
+  title           String?
+  mediaType       String   @default("image")
+  image           String?
+  videoUrl        String?
+  videoPoster     String?
+  caption         String?
+  category        String?
+  altText         String?
+  season          String?
+  year            String?
+  featured        Boolean  @default(false)
+  displayOrder    Int      @default(0)
+  lightboxEnabled Boolean  @default(true)
+  published       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  excerpt         String?
+  content         String?
+  featuredImage   String?
+  category        String?
+  tags            String?
+  author          String?
+  publishedAt     String?
+  metaTitle       String?
+  metaDescription String?
+  published       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  shortDesc       String?
+  fullDesc        String?
+  icon            String?
+  image           String?
+  pricingModel    String?
+  price           Float?
+  duration        String?
+  features        String?
+  displayOrder    Int      @default(0)
+  featured        Boolean  @default(false)
+  showOnHome      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Faq {
+  id          String   @id @default(cuid())
+  question    String
+  answer      String
+  category    String?
+  displayOrder Int     @default(0)
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String?
+  type      String   @default("text")
+  group     String   @default("general")
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
+}
+
+model Navigation {
+  id        String   @id @default(cuid())
+  label     String
+  url       String
+  order     Int      @default(0)
+  parentId  String?
+  parent    Navigation? @relation("NavParent", fields: [parentId], references: [id])
+  children  Navigation[] @relation("NavParent")
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model FooterSection {
+  id        String   @id @default(cuid())
+  type      String
+  title     String?
+  items     String
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  interest  String?
+  location  String?
+  budget    String?
+  message   String?
+  source    String   @default("contact")
+  status    String   @default("new")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  altText   String?
+  createdAt DateTime @default(now())
+}
+
+model SeoMeta {
+  id              String   @id @default(cuid())
+  pageType        String   @unique
+  title           String?
+  description     String?
+  keywords        String?
+  ogImage         String?
+  structuredData  String?
+  canonical       String?
+  aiGenerated     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
