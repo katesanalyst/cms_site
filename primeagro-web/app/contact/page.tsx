@@ -86,8 +86,8 @@ export default async function ContactPage() {
               <div className="space-y-4">
                 {faqSection.items.map((item: any, i: number) => (
                   <div key={i} className="bg-white rounded-xl p-6 border border-border-light">
-                    <h4 className="font-bold text-primary-dark mb-2 text-sm">{item.title}</h4>
-                    <p className="text-text-light text-sm leading-relaxed">{item.text}</p>
+                    <h4 className="font-bold text-primary-dark mb-2 text-sm">{item.title || item.question}</h4>
+                    <p className="text-text-light text-sm leading-relaxed">{item.text || item.answer}</p>
                   </div>
                 ))}
               </div>

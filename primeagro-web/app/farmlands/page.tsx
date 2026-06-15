@@ -23,7 +23,7 @@ export default async function FarmlandsPage() {
   const hero = pageData?.hero;
   const sections = pageData?.sections || [];
 
-  const overviewSection = getSection(sections, "overview") || getSection(sections, "welcome");
+  const overviewSection = getSection(sections, "overview") || getSection(sections, "welcome") || getSection(sections, "available") || getSection(sections, "lands");
   const phone = settings?.whatsapp || "+91 98765 43210";
   const phoneDigits = phone.replace(/[^0-9]/g, "");
 
