@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import Hero from "@/components/ui/Hero";
 import StorySection from "@/components/ui/StorySection";
 import { fetchSiteSettings, fetchPageBySlug, fetchPageMeta } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -48,9 +49,8 @@ export default async function ContactPage() {
         <Container>
           <StorySection
             badge={reachSection?.badge || "Get in Touch"}
-            badgeIcon={reachSection?.badgeIcon || "📞"}
+            badgeIcon={resolveIcon(reachSection?.badgeIcon, reachSection?.badge) || "📞"}
             heading={reachSection?.heading || "We are always happy to talk to fellow soil lovers."}
-            italicWords={reachSection?.italicWords ? reachSection.italicWords.split(",").map((w: string) => w.trim()) : ["soil lovers"]}
             text={reachSection?.text || "From bulk orders to partnership inquiries, just reach out. We usually respond within one business day."}
           />
 

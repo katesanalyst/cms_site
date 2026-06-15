@@ -5,6 +5,7 @@ import Hero from "@/components/ui/Hero";
 import Container from "@/components/ui/Container";
 import StorySection from "@/components/ui/StorySection";
 import VideoPlayer from "@/components/ui/VideoPlayer";
+import { resolveIcon } from "@/lib/icons";
 
 interface GalleryItem {
   _id: string;
@@ -37,7 +38,6 @@ interface SectionData {
   badge?: string;
   badgeIcon?: string;
   heading?: string;
-  italicWords?: string;
   text?: string;
   items?: any[];
 }
@@ -80,9 +80,8 @@ export default function GalleryClient({ initialItems, hero, introSection, ctaSec
         <Container>
           <StorySection
             badge={introSection?.badge || "Gallery"}
-            badgeIcon={introSection?.badgeIcon || "📷"}
+            badgeIcon={resolveIcon(introSection?.badgeIcon, introSection?.badge) || "📷"}
             heading={introSection?.heading || "A walk through the forest tells you everything a brochure cannot."}
-            italicWords={introSection?.italicWords ? introSection.italicWords.split(",").map((w: string) => w.trim()) : ["cannot"]}
             text={introSection?.text}
           />
 
@@ -164,9 +163,8 @@ export default function GalleryClient({ initialItems, hero, introSection, ctaSec
           <div className="relative z-10">
             <StorySection
               badge={ctaSection?.badge || "Visit Us"}
-              badgeIcon={ctaSection?.badgeIcon || "🌿"}
+              badgeIcon={resolveIcon(ctaSection?.badgeIcon, ctaSection?.badge) || "🌿"}
               heading={ctaSection?.heading || "The forest does not show itself through a screen. Come walk it."}
-              italicWords={ctaSection?.italicWords ? ctaSection.italicWords.split(",").map((w: string) => w.trim()) : ["walk it"]}
               text={ctaSection?.text || "Schedule a farm visit and see our operations firsthand."}
               light
             />

@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import Hero from "@/components/ui/Hero";
 import StorySection from "@/components/ui/StorySection";
 import { fetchFarmLands, fetchSiteSettings, fetchPageBySlug, fetchPageMeta } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -44,9 +45,8 @@ export default async function FarmlandsPage() {
           <Container>
             <StorySection
               badge={overviewSection.badge || "Overview"}
-              badgeIcon={overviewSection.badgeIcon || "🌾"}
+              badgeIcon={resolveIcon(overviewSection.badgeIcon, overviewSection.badge) || "🌾"}
               heading={overviewSection.heading}
-              italicWords={overviewSection.italicWords ? overviewSection.italicWords.split(",").map((w: string) => w.trim()) : []}
               text={overviewSection.text}
             />
           </Container>

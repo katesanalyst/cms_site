@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Button from "./Button";
 
 interface HeroProps {
@@ -11,6 +11,7 @@ interface HeroProps {
   variant?: "home" | "page";
   heroImage?: { asset: { url: string }; alt?: string } | null;
   heroVideo?: { videoType: string; videoUrl: string; title?: string; poster?: { asset: { url: string }; alt?: string } };
+  showSoundToggle?: boolean;
 }
 
 function getYouTubeId(url: string): string | null {
@@ -23,9 +24,12 @@ function getVimeoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-export default function Hero({ tag, heading, text, buttons, variant = "home", heroImage, heroVideo }: HeroProps) {
+export default function Hero({ tag, heading, text, buttons, variant = "home", heroImage, heroVideo, showSoundToggle = false }: HeroProps) {
   const isHome = variant === "home";
   const [videoOpen, setVideoOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [videoError, setVideoError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const bgStyle = heroImage?.asset?.url
     ? { backgroundImage: `url(${heroImage.asset.url})` }
@@ -39,13 +43,23 @@ export default function Hero({ tag, heading, text, buttons, variant = "home", he
   const ytId = isYouTube ? getYouTubeId(heroVideo!.videoUrl) : null;
   const vimeoId = isVimeo ? getVimeoId(heroVideo!.videoUrl) : null;
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  function handleVideoError() {
+    setVideoError(true);
+  }
+
   return (
     <section
       className={`relative flex items-center justify-center text-center text-white overflow-hidden ${
         isHome ? "min-h-[90vh]" : "py-24"
       }`}
     >
-      {/* Video Background */}
+      {/* Video Background - YouTube/Vimeo (muted autoplay) */}
       {hasVideo && (isYouTube || isVimeo) && (ytId || vimeoId) && (
         <>
           <div className="absolute inset-0 w-full h-full overflow-hidden">
@@ -56,23 +70,64 @@ export default function Hero({ tag, heading, text, buttons, variant = "home", he
               allow="autoplay; encrypted-media"
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
               style={{ border: "none", width: "177.78vh", height: "100vh", minWidth: "100vw", minHeight: "56.25vw" }}
+              onError={handleVideoError}
             />
           </div>
           <div className="absolute inset-0 bg-black/40" />
         </>
       )}
 
+      {/* Video Background - MP4 (muted autoplay) */}
       {hasVideo && isMP4 && (
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <video
+            ref={videoRef}
             src={heroVideo!.videoUrl}
             autoPlay
             muted
             loop
             playsInline
+            onError={handleVideoError}
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover"
           />
         </div>
+      )}
+
+      {/* Video Error Message */}
+      {hasVideo && videoError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
+          <div className="text-center p-8">
+            <svg className="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <p className="text-white text-lg font-medium">Video failed to load</p>
+            <p className="text-white/60 text-sm mt-1">Check the video URL in CMS Settings → Homepage</p>
+          </div>
+        </div>
+      )}
+
+      {/* Click to Play with Sound Overlay - only when enabled in CMS */}
+      {hasVideo && !videoError && showSoundToggle && (
+        <button
+          onClick={() => {
+            if (isMP4) {
+              setIsMuted(false);
+            } else {
+              setVideoOpen(true);
+            }
+          }}
+          className="absolute inset-0 z-20 flex items-center justify-center group cursor-pointer"
+          aria-label="Play video with sound"
+        >
+          <div className="flex flex-col items-center gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-colors border border-white/30 group-hover:scale-110 transform">
+              <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+              </svg>
+            </div>
+            <span className="text-white/80 text-sm font-medium tracking-wide">Click to Play with Sound</span>
+          </div>
+        </button>
       )}
 
       {/* Image Background (only if no video) */}
@@ -113,22 +168,10 @@ export default function Hero({ tag, heading, text, buttons, variant = "home", he
           {buttons && buttons.map((btn, i) => (
             <Button key={i} text={btn.text} href={btn.link} variant={btn.variant || "gold"} />
           ))}
-
-          {hasVideo && (
-            <button
-              onClick={() => setVideoOpen(true)}
-              className="ml-2 w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors border border-white/30"
-              aria-label="Play video fullscreen"
-            >
-              <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Video modal (fullscreen on click) */}
+      {/* Video modal (fullscreen on click - for YouTube/Vimeo with sound) */}
       {videoOpen && hasVideo && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
@@ -137,7 +180,7 @@ export default function Hero({ tag, heading, text, buttons, variant = "home", he
           <div className="w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
             {isYouTube && ytId && (
               <iframe
-                src={`https://www.youtube.com/embed/${ytId}?autoplay=1`}
+                src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0`}
                 allow="autoplay; encrypted-media"
                 allowFullScreen
                 className="w-full aspect-video rounded-lg"
@@ -145,7 +188,7 @@ export default function Hero({ tag, heading, text, buttons, variant = "home", he
             )}
             {isVimeo && vimeoId && (
               <iframe
-                src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1`}
+                src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0`}
                 allow="autoplay; encrypted-media"
                 allowFullScreen
                 className="w-full aspect-video rounded-lg"

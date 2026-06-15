@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Container from "../ui/Container";
+import NewsletterForm from "./NewsletterForm";
 
 interface FooterLink {
   label: string;
@@ -93,19 +94,7 @@ export default function Footer({ footer, settings }: FooterProps) {
               <h3 className="text-xl font-serif font-bold mb-1">{newsletterHeading}</h3>
               <p className="text-white/60 text-sm">{newsletterDesc}</p>
             </div>
-            <form className="flex w-full md:w-auto">
-              <input
-                type="email"
-                placeholder={newsletterPlaceholder}
-                className="flex-1 md:w-72 px-5 py-3 rounded-l-full bg-white/10 border border-white/10 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-accent"
-              />
-              <button
-                type="submit"
-                className="bg-accent text-primary-dark px-6 py-3 rounded-r-full font-semibold text-sm hover:bg-accent-dark transition-colors"
-              >
-                {newsletterBtnText}
-              </button>
-            </form>
+            <NewsletterForm placeholder={newsletterPlaceholder} buttonText={newsletterBtnText} />
           </div>
         </Container>
       </div>

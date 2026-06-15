@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import Hero from "@/components/ui/Hero";
 import StorySection from "@/components/ui/StorySection";
 import { fetchSiteSettings, fetchPageBySlug, fetchPageMeta } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -44,9 +45,8 @@ export default async function AboutPage() {
         <Container>
           <StorySection
             badge={storySection?.badge || "Our Story"}
-            badgeIcon={storySection?.badgeIcon || "🎯"}
+            badgeIcon={resolveIcon(storySection?.badgeIcon, storySection?.badge) || "🎯"}
             heading={storySection?.heading || "We are not a factory. We are not a farm. We are forest keepers."}
-            italicWords={storySection?.italicWords ? storySection.italicWords.split(",").map((w: string) => w.trim()) : ["forest keepers"]}
             text={storySection?.text || "Since 1992, we have believed that farming is not just an occupation — it is a relationship with the land. Every decision we make is guided by a deep respect for the soil, the water, and the people who work with us."}
           />
         </Container>
@@ -57,9 +57,8 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <StorySection
               badge={visionSection?.badge || "Our Vision"}
-              badgeIcon={visionSection?.badgeIcon || "🌿"}
+              badgeIcon={resolveIcon(visionSection?.badgeIcon, visionSection?.badge) || "🌿"}
               heading={visionSection?.heading || "Our Vision 2027"}
-              italicWords={visionSection?.italicWords ? visionSection.italicWords.split(",").map((w: string) => w.trim()) : []}
               text={visionSection?.text || "At Prime Agro Farms, we practice regenerative agriculture — a method that works with nature, not against it."}
               align="left"
             />
@@ -96,9 +95,8 @@ export default async function AboutPage() {
         <Container>
           <StorySection
             badge={teamSection?.badge || "Our Team"}
-            badgeIcon={teamSection?.badgeIcon || "👥"}
+            badgeIcon={resolveIcon(teamSection?.badgeIcon, teamSection?.badge) || "👥"}
             heading={teamSection?.heading || "Led by farmers. Powered by purpose."}
-            italicWords={teamSection?.italicWords ? teamSection.italicWords.split(",").map((w: string) => w.trim()) : ["farmers", "purpose"]}
             text={teamSection?.text || "From the Chairman to the field supervisors, our leadership team has one thing in common — a shared love for the land and a commitment to doing things the right way."}
           />
           <div className="flex flex-wrap justify-center gap-4 mt-10">

@@ -4,6 +4,7 @@ import StorySection from "@/components/ui/StorySection";
 import StatsBar from "@/components/home/StatsBar";
 import Button from "@/components/ui/Button";
 import { fetchPageBySlug, fetchPageMeta } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -35,9 +36,8 @@ function renderSection(section: any, idx: number) {
         <Container>
           <StorySection
             badge={section.badge}
-            badgeIcon={section.badgeIcon}
+            badgeIcon={resolveIcon(section.badgeIcon, section.badge)}
             heading={section.heading}
-            italicWords={section.italicWords ? section.italicWords.split(",").map((w: string) => w.trim()) : []}
             text={section.text}
             align={section.align || "left"}
             light={section.light}
@@ -47,7 +47,7 @@ function renderSection(section: any, idx: number) {
               {items.map((card: any, i: number) => (
                 <div key={i} className="bg-white rounded-2xl p-8 text-center shadow-sm border border-border-light hover:shadow-lg transition-shadow">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                    <span className="text-3xl">{card.icon}</span>
+                    <span className="text-3xl">{resolveIcon(card.icon, card.title)}</span>
                   </div>
                   <h3 className="font-serif font-bold text-primary-dark text-lg mb-3">{card.title}</h3>
                   <p className="text-text-light text-sm leading-relaxed">{card.text}</p>
@@ -67,9 +67,8 @@ function renderSection(section: any, idx: number) {
           {section.heading && (
             <StorySection
               badge={section.badge}
-              badgeIcon={section.badgeIcon}
+              badgeIcon={resolveIcon(section.badgeIcon, section.badge)}
               heading={section.heading}
-              italicWords={section.italicWords ? section.italicWords.split(",").map((w: string) => w.trim()) : []}
               text={section.text}
             />
           )}
@@ -77,7 +76,7 @@ function renderSection(section: any, idx: number) {
             {items.map((card: any, i: number) => (
               <div key={i} className="bg-white rounded-2xl p-8 text-center shadow-sm border border-border-light hover:shadow-lg transition-shadow">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                  <span className="text-3xl">{card.icon}</span>
+                  <span className="text-3xl">{resolveIcon(card.icon, card.title)}</span>
                 </div>
                 <h3 className="font-serif font-bold text-primary-dark text-lg mb-3">{card.title}</h3>
                 <p className="text-text-light text-sm leading-relaxed">{card.text}</p>
@@ -101,9 +100,8 @@ function renderSection(section: any, idx: number) {
           <div className="relative z-10">
             <StorySection
               badge={section.badge}
-              badgeIcon={section.badgeIcon}
+              badgeIcon={resolveIcon(section.badgeIcon, section.badge)}
               heading={section.heading}
-              italicWords={section.italicWords ? section.italicWords.split(",").map((w: string) => w.trim()) : []}
               text={section.text}
               light
             />
@@ -149,7 +147,6 @@ export default async function SustainabilityPage() {
                   badge="Solar Technology"
                   badgeIcon="☀️"
                   heading="The sun does the work. We simply hold the jar."
-                  italicWords={["work", "jar"]}
                   text="We harness the power of the sun for natural dehydration of our organic produce. Our solar drying technology preserves nutrients naturally without chemical preservatives, reducing energy consumption and carbon footprint."
                   align="left"
                 />
@@ -185,7 +182,7 @@ export default async function SustainabilityPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-[#2d3a1e] via-[#3a5530] to-[#4a6b3d]" />
             <Container>
               <div className="relative z-10">
-                <StorySection badge="Join Us" badgeIcon="🌍" heading="A forest that is loved is a forest that is kept." italicWords={["loved", "kept"]} text="Be part of a greener future. Invest in organic farmland and support sustainable agriculture." light />
+                <StorySection badge="Join Us" badgeIcon="🌍" heading="A forest that is loved is a forest that is kept." text="Be part of a greener future. Invest in organic farmland and support sustainable agriculture." light />
                 <div className="flex justify-center mt-10">
                   <Button text="Get Involved" href="/contact" variant="gold" />
                 </div>

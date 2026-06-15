@@ -7,6 +7,7 @@ import TestimonialCarousel from "@/components/home/TestimonialCarousel";
 import GalleryGrid from "@/components/home/GalleryGrid";
 import Button from "@/components/ui/Button";
 import { fetchHomePage, fetchTestimonials, fetchPageBySlug, fetchPageMeta } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,7 @@ export default async function HomePage() {
         text={hero?.subheading || data.heroText}
         heroImage={hero?.bgType === "image" && hero.bgImage ? { asset: { url: hero.bgImage } } : data.heroImage}
         heroVideo={hero?.bgType === "video" && hero.videoUrl && hero.videoType ? { videoUrl: hero.videoUrl, videoType: hero.videoType } : data.heroVideo}
+        showSoundToggle={data.heroShowSoundToggle}
         buttons={hero?.buttons?.length
           ? hero.buttons.map((b: any) => ({ text: b.text, link: b.href || b.link || "/", variant: b.variant || "gold" }))
           : [
@@ -65,14 +67,13 @@ export default async function HomePage() {
         <Container>
           <StorySection
             badge={focusSection?.badge || "What We Do"}
-            badgeIcon={focusSection?.badgeIcon || "🌾"}
+            badgeIcon={resolveIcon(focusSection?.badgeIcon, focusSection?.badge) || "🌾"}
             heading={focusSection?.heading || "The land gives what the land is given. We give it everything."}
-            italicWords={focusSection?.italicWords ? focusSection.italicWords.split(",").map((w: string) => w.trim()) : ["everything"]}
             text={focusSection?.text || "Three pillars of sustainable agriculture — premium fig cultivation, organic dehydration, and long-term mango plantations. Each one rooted in patience, harvested with care."}
           />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-14">
             {cards.map((card: { icon: string; title: string; text: string; image?: { asset: { url: string }; alt?: string } }, i: number) => (
-              <FeatureCard key={i} icon={card.icon} title={card.title} text={card.text} image={card.image} index={i} />
+              <FeatureCard key={i} icon={resolveIcon(card.icon, card.title)} title={card.title} text={card.text} image={card.image} index={i} />
             ))}
           </div>
         </Container>
@@ -84,9 +85,8 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <StorySection
               badge={sustainSection?.badge || "Sustainability"}
-              badgeIcon={sustainSection?.badgeIcon || "☀️"}
+              badgeIcon={resolveIcon(sustainSection?.badgeIcon, sustainSection?.badge) || "☀️"}
               heading={sustainSection?.heading || "We do not take from the sun. We simply ask it to help."}
-              italicWords={sustainSection?.italicWords ? sustainSection.italicWords.split(",").map((w: string) => w.trim()) : ["help"]}
               text={sustainSection?.text || data.sustainText}
               align="left"
             />
@@ -139,9 +139,8 @@ export default async function HomePage() {
         <Container>
           <StorySection
             badge={processSection?.badge || "Our Process"}
-            badgeIcon={processSection?.badgeIcon || "🌱"}
+            badgeIcon={resolveIcon(processSection?.badgeIcon, processSection?.badge) || "🌱"}
             heading={processSection?.heading || "The bees fill the comb when they are ready. We wait."}
-            italicWords={processSection?.italicWords ? processSection.italicWords.split(",").map((w: string) => w.trim()) : ["ready", "wait"]}
             text={processSection?.text || "From seed to table, every step is guided by nature and patience. We do not rush the harvest. We wait until the land says it is time."}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-14">
@@ -170,10 +169,9 @@ export default async function HomePage() {
       <TestimonialCarousel
         testimonials={testimonials || []}
         heading={data.testimonialHeading || undefined}
-        italicWords={data.testimonialItalicWords ? data.testimonialItalicWords.split(",").map((w: string) => w.trim()) : undefined}
         text={data.testimonialText || undefined}
         badge={getSection(sections, "testimonial")?.badge || undefined}
-        badgeIcon={getSection(sections, "testimonial")?.badgeIcon || undefined}
+        badgeIcon={resolveIcon(getSection(sections, "testimonial")?.badgeIcon, getSection(sections, "testimonial")?.badge) || undefined}
       />
       <GalleryGrid />
 
@@ -185,9 +183,8 @@ export default async function HomePage() {
           <div className="relative z-10">
             <StorySection
               badge={ctaSection?.badge || "Get Started"}
-              badgeIcon={ctaSection?.badgeIcon || "🌿"}
+              badgeIcon={resolveIcon(ctaSection?.badgeIcon, ctaSection?.badge) || "🌿"}
               heading={ctaSection?.heading || "We simply obey the land. And the land obeys us back."}
-              italicWords={ctaSection?.italicWords ? ctaSection.italicWords.split(",").map((w: string) => w.trim()) : ["land", "back"]}
               text={ctaSection?.text || data.ctaText}
               light
             />

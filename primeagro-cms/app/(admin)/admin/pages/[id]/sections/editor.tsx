@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(() => import("@/components/editor/RichTextEditor"), { ssr: false });
 
 const sectionTypes = [
   { value: "story", label: "Story Section" },
@@ -23,7 +26,6 @@ function SectionForm({ section, onSave, onCancel }: { section: any; onSave: (dat
     badge: section?.badge || "",
     badgeIcon: section?.badgeIcon || "",
     heading: section?.heading || "",
-    italicWords: section?.italicWords || "",
     text: section?.text || "",
     items: section?.items || "",
     align: section?.align || "left",
@@ -68,17 +70,20 @@ function SectionForm({ section, onSave, onCancel }: { section: any; onSave: (dat
 
       <div>
         <label className="block text-sm font-medium mb-1">Heading</label>
-        <input value={form.heading} onChange={(e) => setForm({ ...form, heading: e.target.value })} className="w-full border rounded px-3 py-2 text-sm" placeholder="Main heading text" />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1">Italic Words (comma separated)</label>
-        <input value={form.italicWords} onChange={(e) => setForm({ ...form, italicWords: e.target.value })} className="w-full border rounded px-3 py-2 text-sm" placeholder="e.g. help, sustain" />
+        <RichTextEditor
+          content={form.heading}
+          onChange={(html) => setForm({ ...form, heading: html })}
+          placeholder="Main heading text — select words to make italic/bold"
+        />
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-1">Text / Description</label>
-        <textarea value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} rows={3} className="w-full border rounded px-3 py-2 text-sm" placeholder="Paragraph text" />
+        <RichTextEditor
+          content={form.text}
+          onChange={(html) => setForm({ ...form, text: html })}
+          placeholder="Paragraph text"
+        />
       </div>
 
       <div>

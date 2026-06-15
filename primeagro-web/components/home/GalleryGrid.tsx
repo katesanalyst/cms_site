@@ -1,6 +1,7 @@
 import Link from "next/link";
 import StorySection from "../ui/StorySection";
 import { fetchGallery, fetchPageBySlug } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 
 const fallbackItems = [
   { emoji: "🌿", label: "Organic Farm", href: "/gallery" },
@@ -34,9 +35,8 @@ export default async function GalleryGrid() {
       <div className="max-w-7xl mx-auto px-4">
         <StorySection
           badge={gallerySection?.badge || "Gallery"}
-          badgeIcon={gallerySection?.badgeIcon || "📷"}
+          badgeIcon={resolveIcon(gallerySection?.badgeIcon, gallerySection?.badge) || "📷"}
           heading={gallerySection?.heading || "A walk through the forest tells you everything a brochure cannot."}
-          italicWords={gallerySection?.italicWords ? gallerySection.italicWords.split(",").map((w: string) => w.trim()) : ["cannot"]}
           text={gallerySection?.text || "Explore our farms, products, and the people who make it all happen."}
         />
 

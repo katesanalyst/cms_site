@@ -2,6 +2,7 @@ import Hero from "@/components/ui/Hero";
 import Container from "@/components/ui/Container";
 import StorySection from "@/components/ui/StorySection";
 import { fetchPageBySlug, fetchBlogPosts, fetchPageMeta } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -57,9 +58,8 @@ export default async function BlogPage() {
         <Container>
           <StorySection
             badge={introSection?.badge || "Blog"}
-            badgeIcon={introSection?.badgeIcon || "📝"}
+            badgeIcon={resolveIcon(introSection?.badgeIcon, introSection?.badge) || "📝"}
             heading={introSection?.heading || "Notes from the field. Stories the soil whispered."}
-            italicWords={introSection?.italicWords ? introSection.italicWords.split(",").map((w: string) => w.trim()) : ["whispered"]}
             text={introSection?.text}
           />
 

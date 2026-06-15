@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StorySection from "../ui/StorySection";
-import { urlFor } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 
 interface Testimonial {
   _id: string;
@@ -37,15 +37,18 @@ const fallbackTestimonials: Testimonial[] = [
   },
 ];
 
-export default function TestimonialCarousel({ testimonials, heading, italicWords, text, badge, badgeIcon }: { testimonials: Testimonial[]; heading?: string; italicWords?: string[]; text?: string; badge?: string; badgeIcon?: string }) {
+export default function TestimonialCarousel({ testimonials, heading, text, badge, badgeIcon }: { testimonials: Testimonial[]; heading?: string; text?: string; badge?: string; badgeIcon?: string }) {
   const list = testimonials?.length ? testimonials : fallbackTestimonials;
   const [active, setActive] = useState(0);
 
-  const next = () => setActive((p) => (p + 1) % list.length);
-  const prev = () => setActive((p) => (p - 1 + list.length) % list.length);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActive((p) => (p + 1) % list.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [list.length]);
 
   const displayHeading = heading || "The forest does not advertise. The people who taste it speak for themselves.";
-  const displayItalicWords = italicWords || ["people", "speak for themselves"];
   const displayText = text || "We have never asked for a review. Never offered a discount in exchange for kind words. These came in emails, handwritten letters, and quiet conversations.";
 
   return (
@@ -53,9 +56,8 @@ export default function TestimonialCarousel({ testimonials, heading, italicWords
       <div className="max-w-7xl mx-auto px-4">
         <StorySection
           badge={badge || "Testimonials"}
-          badgeIcon={badgeIcon || "🌿"}
+          badgeIcon={resolveIcon(badgeIcon, badge) || "🌿"}
           heading={displayHeading}
-          italicWords={displayItalicWords}
           text={displayText}
         />
 
@@ -99,16 +101,6 @@ export default function TestimonialCarousel({ testimonials, heading, italicWords
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="flex justify-center gap-3 mt-10">
-            <button onClick={prev} className="w-10 h-10 rounded-full border border-primary/30 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors">←</button>
-            <div className="flex items-center gap-2">
-              {list.map((_, i) => (
-                <button key={i} onClick={() => setActive(i)} className={`w-2 h-2 rounded-full transition-all ${i === active ? "bg-accent w-6" : "bg-border"}`} />
-              ))}
-            </div>
-            <button onClick={next} className="w-10 h-10 rounded-full border border-primary/30 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors">→</button>
           </div>
         </div>
       </div>

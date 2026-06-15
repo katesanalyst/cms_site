@@ -3,6 +3,7 @@ import Container from "@/components/ui/Container";
 import StorySection from "@/components/ui/StorySection";
 import Button from "@/components/ui/Button";
 import { fetchPageBySlug, fetchFAQs, fetchSiteSettings, fetchPageMeta } from "@/lib/sanity";
+import { resolveIcon } from "@/lib/icons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -88,9 +89,8 @@ export default async function FarmingFocusPage() {
         <Container>
           <StorySection
             badge={benefitsSection?.badge || "What We Offer"}
-            badgeIcon={benefitsSection?.badgeIcon || "🌾"}
+            badgeIcon={resolveIcon(benefitsSection?.badgeIcon, benefitsSection?.badge) || "🌾"}
             heading={benefitsSection?.heading || "We do not just sell land. We grow futures."}
-            italicWords={benefitsSection?.italicWords ? benefitsSection.italicWords.split(",").map((w: string) => w.trim()) : ["futures"]}
             text={benefitsSection?.text || "Complete farm development support from selection to harvest."}
           />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-14">
@@ -111,9 +111,8 @@ export default async function FarmingFocusPage() {
         <Container>
           <StorySection
             badge={whyChooseSection?.badge || "Why Prime Agro"}
-            badgeIcon={whyChooseSection?.badgeIcon || "⭐"}
+            badgeIcon={resolveIcon(whyChooseSection?.badgeIcon, whyChooseSection?.badge) || "⭐"}
             heading={whyChooseSection?.heading || "Trust is not sold. It is grown, slowly, season by season."}
-            italicWords={whyChooseSection?.italicWords ? whyChooseSection.italicWords.split(",").map((w: string) => w.trim()) : ["grown", "slowly"]}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mt-14">
             {whyChoose.map((w: { icon: string; title: string; text: string }, i: number) => (
@@ -177,9 +176,8 @@ export default async function FarmingFocusPage() {
         <Container>
           <StorySection
             badge={faqSection?.badge || "FAQs"}
-            badgeIcon={faqSection?.badgeIcon || "❓"}
+            badgeIcon={resolveIcon(faqSection?.badgeIcon, faqSection?.badge) || "❓"}
             heading={faqSection?.heading || "The questions people ask are the questions worth answering."}
-            italicWords={faqSection?.italicWords ? faqSection.italicWords.split(",").map((w: string) => w.trim()) : ["worth answering"]}
           />
           <div className="max-w-2xl mx-auto space-y-3 mt-14">
             {faqs.map((faq: any, i: number) => (
@@ -198,9 +196,8 @@ export default async function FarmingFocusPage() {
           <div className="relative z-10">
             <StorySection
               badge={ctaSection?.badge || "Get Started"}
-              badgeIcon={ctaSection?.badgeIcon || "🌿"}
+              badgeIcon={resolveIcon(ctaSection?.badgeIcon, ctaSection?.badge) || "🌿"}
               heading={ctaSection?.heading || "Every forest began with a single seed. Yours begins here."}
-              italicWords={ctaSection?.italicWords ? ctaSection.italicWords.split(",").map((w: string) => w.trim()) : ["single seed", "here"]}
               text={ctaSection?.text || "Take the first step towards sustainable farming and a greener future."}
               light
             />

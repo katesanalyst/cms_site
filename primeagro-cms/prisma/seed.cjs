@@ -36,15 +36,16 @@ async function main() {
     { key: "heroTag", value: "Sustainable Farming" },
     { key: "heroHeading", value: "Cultivating Tomorrow's\nHarvest Today" },
     { key: "heroText", value: "Premium organic farming, Dyanna California Anjeera cultivation, and assisted dream farmland ownership for a sustainable tomorrow." },
-    { key: "heroImage", value: "/images/hero-bg.jpg" },
+    { key: "heroImage", value: "/images/hero-bg.svg" },
+    { key: "heroShowSoundToggle", value: "false" },
     { key: "sustainText", value: "At Prime Agro Farms, sustainability isn't just a practice—it's our philosophy. Our solar-powered processing unit ensures zero-waste, eco-friendly farming from seed to shelf." },
-    { key: "sustainImage", value: "/images/sustainability.jpg" },
+    { key: "sustainImage", value: "/images/sustainability.svg" },
     { key: "sustainBoxTitle", value: "Solar Processing Unit" },
     { key: "sustainBoxText", value: "State-of-the-art solar dehydration facility for premium organic produce." },
     { key: "ctaText", value: "Ready to invest in sustainable agriculture? Connect with us today." },
-    { key: "anjeeraImage", value: "/images/anjeera.jpg" },
-    { key: "dehydratedImage", value: "/images/dehydrated.jpg" },
-    { key: "mangoImage", value: "/images/mango.jpg" },
+    { key: "anjeeraImage", value: "/images/anjeera.svg" },
+    { key: "dehydratedImage", value: "/images/dehydrated.svg" },
+    { key: "mangoImage", value: "/images/mango.svg" },
     // Logo
     { key: "logoInitial", value: "P" },
     { key: "logoName", value: "Prime Agro" },
@@ -76,13 +77,12 @@ async function main() {
   ];
 
   for (const s of settings) {
-    await prisma.siteSetting.upsert({
-      where: { key: s.key },
-      update: { value: s.value },
-      create: s,
-    });
+    const existing = await prisma.siteSetting.findFirst({ where: { key: s.key } });
+    if (!existing) {
+      await prisma.siteSetting.create({ data: s });
+    }
   }
-  console.log(`Seeded ${settings.length} site settings`);
+  console.log(`Seeded ${settings.length} site settings (skipped existing)`);
 
   // Pages
   const pages = [
@@ -98,14 +98,15 @@ async function main() {
 
   const createdPages = {};
   for (const p of pages) {
-    const page = await prisma.page.upsert({
-      where: { slug: p.slug },
-      update: p,
-      create: p,
-    });
-    createdPages[p.slug] = page;
+    const existing = await prisma.page.findFirst({ where: { slug: p.slug } });
+    if (existing) {
+      createdPages[p.slug] = existing;
+    } else {
+      const page = await prisma.page.create({ data: p });
+      createdPages[p.slug] = page;
+    }
   }
-  console.log(`Seeded ${pages.length} pages`);
+  console.log(`Seeded ${pages.length} pages (skipped existing)`);
 
   // Heroes
   const heroes = [
@@ -115,7 +116,7 @@ async function main() {
       heading: "Cultivating Tomorrow's Harvest Today",
       subheading: "Premium organic farming and assisted dream farmland ownership",
       bgType: "image",
-      bgImage: "/images/hero-bg.jpg",
+      bgImage: "/images/hero-bg.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -130,7 +131,7 @@ async function main() {
       heading: "Who We Are",
       subheading: "Building a sustainable future through organic farming",
       bgType: "image",
-      bgImage: "/images/about-hero.jpg",
+      bgImage: "/images/about-hero.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -141,7 +142,7 @@ async function main() {
       heading: "Own Your Dream Farmland",
       subheading: "Premium farmland investments with expert support",
       bgType: "image",
-      bgImage: "/images/farming-hero.jpg",
+      bgImage: "/images/farming-hero.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -152,7 +153,7 @@ async function main() {
       heading: "Sustainability at Prime Agro Farms",
       subheading: "Eco-friendly farming from seed to shelf",
       bgType: "image",
-      bgImage: "/images/sustainability-hero.jpg",
+      bgImage: "/images/sustainability-hero.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -163,7 +164,7 @@ async function main() {
       heading: "Farmland Opportunities",
       subheading: "Invest in certified organic farmland",
       bgType: "image",
-      bgImage: "/images/farmlands-hero.jpg",
+      bgImage: "/images/farmlands-hero.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -174,7 +175,7 @@ async function main() {
       heading: "Gallery & Videos",
       subheading: "Explore our farms, products, and events",
       bgType: "image",
-      bgImage: "/images/gallery-hero.jpg",
+      bgImage: "/images/gallery-hero.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -185,7 +186,7 @@ async function main() {
       heading: "Blog & Insights",
       subheading: "Latest news and articles from Prime Agro Farms",
       bgType: "image",
-      bgImage: "/images/blog-hero.jpg",
+      bgImage: "/images/blog-hero.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -196,7 +197,7 @@ async function main() {
       heading: "Contact Us",
       subheading: "Get in touch with our team",
       bgType: "image",
-      bgImage: "/images/contact-hero.jpg",
+      bgImage: "/images/contact-hero.svg",
       overlayOpacity: 40,
       textColor: "white",
       textAlign: "left",
@@ -204,13 +205,12 @@ async function main() {
   ];
 
   for (const h of heroes) {
-    await prisma.hero.upsert({
-      where: { pageId: h.pageId },
-      update: h,
-      create: h,
-    });
+    const existing = await prisma.hero.findFirst({ where: { pageId: h.pageId } });
+    if (!existing) {
+      await prisma.hero.create({ data: h });
+    }
   }
-  console.log(`Seeded ${heroes.length} heroes`);
+  console.log(`Seeded ${heroes.length} heroes (skipped existing)`);
 
   // Navigation
   const navItems = [

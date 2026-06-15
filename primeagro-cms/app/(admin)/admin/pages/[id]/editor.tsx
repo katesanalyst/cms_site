@@ -2,7 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import RichTextEditor from "@/components/editor/RichTextEditor";
+import dynamic from "next/dynamic";
+import AIPanel from "@/components/ai/AIPanel";
+
+const RichTextEditor = dynamic(() => import("@/components/editor/RichTextEditor"), { ssr: false });
 
 const sectionTypes = [
   { value: "story", label: "Story / Text Block" },
@@ -189,6 +192,13 @@ export default function PageEditor({ page }: { page: any }) {
               </div>
             </div>
           </div>
+          <AIPanel
+            pageType={page.slug}
+            content={pageForm.title + " " + pageForm.metaDescription}
+            currentTitle={pageForm.metaTitle}
+            currentDescription={pageForm.metaDescription}
+            onApplyMeta={(title, desc) => setPageForm({ ...pageForm, metaTitle: title, metaDescription: desc })}
+          />
           <button onClick={savePage} disabled={saving} className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800 text-sm disabled:opacity-50">
             {saving ? "Saving..." : "Save Page"}
           </button>
@@ -352,7 +362,7 @@ export default function PageEditor({ page }: { page: any }) {
                   </div>
                   <div className="mb-3">
                     <label className="block text-xs font-medium mb-1">Heading</label>
-                    <input value={editForm.heading || ""} onChange={(e) => updateEditField("heading", e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                    <RichTextEditor content={editForm.heading || ""} onChange={(val) => updateEditField("heading", val)} placeholder="Section heading — select text to make italic/bold" />
                   </div>
                   <div className="mb-3">
                     <label className="block text-xs font-medium mb-1">Text</label>

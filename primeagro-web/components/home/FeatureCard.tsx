@@ -1,3 +1,5 @@
+import { resolveIcon } from "@/lib/icons";
+
 interface FeatureCardProps {
   icon: string;
   title: string;
@@ -20,7 +22,7 @@ export default function FeatureCard({ icon, title, text, image, index }: Feature
         </div>
       ) : (
         <div className="h-48 bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
-          <span className="text-6xl group-hover:scale-110 transition-transform duration-300">{icon}</span>
+          <span className="text-6xl group-hover:scale-110 transition-transform duration-300">{resolveIcon(icon, title)}</span>
         </div>
       )}
 
@@ -30,7 +32,7 @@ export default function FeatureCard({ icon, title, text, image, index }: Feature
 
         {/* Icon circle (shown even with image) */}
         <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-4 -mt-12 relative z-10 border-4 border-white group-hover:scale-110 transition-transform duration-300">
-          <span className="text-2xl">{icon}</span>
+          <span className="text-2xl">{resolveIcon(icon, title)}</span>
         </div>
 
         <h3 className="font-serif text-lg font-bold text-primary-dark mb-3 leading-snug">{title}</h3>
