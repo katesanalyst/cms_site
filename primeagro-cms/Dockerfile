@@ -23,7 +23,6 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
 COPY --from=builder /app/prisma/seed.cjs ./seed.cjs
 COPY --from=builder /app/next.config.ts ./next.config.ts
-COPY --from=builder /app/fly.toml ./fly.toml
 
 EXPOSE 3334
 
