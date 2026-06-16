@@ -3,8 +3,8 @@ services:
     name: primeagro-cms
     runtime: node
     plan: free
-    buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: npx prisma db push --skip-generate && node seed-all.cjs && npm start
+    buildCommand: cd primeagro-cms && npm install && npx prisma generate && npm run build
+    startCommand: cd primeagro-cms && npx prisma db push --skip-generate && node seed-all.cjs && npm start
     envVars:
       - key: DATABASE_URL
         fromDatabase:
