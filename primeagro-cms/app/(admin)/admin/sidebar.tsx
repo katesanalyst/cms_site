@@ -18,6 +18,7 @@ const navItems = [
   { label: "Services", href: "/admin/services", icon: "🔧" },
   { divider: true },
   { label: "Leads", href: "/admin/leads", icon: "📨" },
+  { label: "Newsletter", href: "/admin/newsletter", icon: "📬" },
   { label: "SEO", href: "/admin/seo", icon: "🔍" },
   { label: "Media", href: "/admin/media", icon: "📁" },
   { divider: true },

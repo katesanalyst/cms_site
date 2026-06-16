@@ -114,6 +114,11 @@ const models: ModelMap = {
     update: (id, d) => prisma.seoMeta.update({ where: { id }, data: d }),
     delete: (id) => prisma.seoMeta.delete({ where: { id } }),
   },
+  newsletterSubscriber: {
+    create: (d) => prisma.newsletterSubscriber.create({ data: d }),
+    update: (id, d) => prisma.newsletterSubscriber.update({ where: { id }, data: d }),
+    delete: (id) => prisma.newsletterSubscriber.delete({ where: { id } }),
+  },
 };
 
 function adminPath(type: string): string {
@@ -134,6 +139,7 @@ function adminPath(type: string): string {
     navigation: "navigation",
     footerSection: "footer",
     seoMeta: "seo",
+    newsletterSubscriber: "newsletter",
   };
   return `/admin/${map[type] || `${type}s`}`;
 }
