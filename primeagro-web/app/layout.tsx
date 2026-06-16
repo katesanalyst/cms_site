@@ -35,6 +35,9 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "en_IN",
       siteName: settings.company_name || "Prime Agro Farms",
     },
+    icons: {
+      icon: "/favicon.svg",
+    },
   };
 }
 

@@ -8,20 +8,20 @@ interface Stat {
 }
 
 function AnimatedNumber({ target }: { target: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
-
   const numericPart = parseInt(target.replace(/[^0-9]/g, ""));
   const suffix = target.replace(/[0-9]/g, "");
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const [count, setCount] = useState(numericPart);
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || hasAnimated) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+          setCount(0);
           const duration = 2000;
           const steps = 60;
           const increment = numericPart / steps;
@@ -42,7 +42,7 @@ function AnimatedNumber({ target }: { target: string }) {
 
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [numericPart]);
+  }, [numericPart, hasAnimated]);
 
   return (
     <span ref={ref}>
