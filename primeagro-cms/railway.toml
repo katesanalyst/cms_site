@@ -1,0 +1,13 @@
+[build]
+  builder = "nixpacks"
+
+[deploy]
+  startCommand = "npx prisma generate && npx prisma db push --skip-generate && node prisma/seed.cjs && npm start"
+  healthcheckPath = "/api/settings"
+  healthcheckTimeout = 300
+  restartPolicyType = "on_failure"
+  restartPolicyMaxRetries = 3
+
+[variables]
+  NEXTAUTH_SECRET = "primeagro-cms-production-secret-change-me"
+  PORT = "3334"
