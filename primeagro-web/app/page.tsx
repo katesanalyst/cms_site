@@ -51,7 +51,7 @@ export default async function HomePage() {
         heading={hero?.heading || data.heroHeading}
         text={hero?.subheading || data.heroText}
         heroImage={hero?.bgType === "image" && hero.bgImage ? { asset: { url: hero.bgImage } } : data.heroImage}
-        heroVideo={hero?.bgType === "video" && hero.videoUrl && hero.videoType ? { videoUrl: hero.videoUrl, videoType: hero.videoType } : data.heroVideo}
+        heroVideo={hero?.videoUrl && hero?.videoType ? { videoUrl: hero.videoUrl, videoType: hero.videoType } : data.heroVideo}
         showSoundToggle={data.heroShowSoundToggle}
         buttons={hero?.buttons?.length
           ? hero.buttons.map((b: any) => ({ text: b.text, link: b.href || b.link || "/", variant: b.variant || "gold" }))
