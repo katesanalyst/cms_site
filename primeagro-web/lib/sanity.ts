@@ -213,7 +213,7 @@ export async function fetchFarmLands() {
 
 export async function fetchNavigation() {
   const items = await fetch(`${CMS_URL}/api/navigation`).then((r) => r.json()).catch(() => []);
-  return items
+  return (Array.isArray(items) ? items : [])
     .filter((n: any) => n.published)
     .sort((a: any, b: any) => a.order - b.order)
     .map((n: any) => ({
@@ -226,7 +226,7 @@ export async function fetchNavigation() {
 
 export async function fetchFooterSections() {
   const items = await fetch(`${CMS_URL}/api/footer`).then((r) => r.json()).catch(() => []);
-  const sections = items
+  const sections = (Array.isArray(items) ? items : [])
     .filter((s: any) => s.published)
     .sort((a: any, b: any) => a.order - b.order)
     .map((s: any) => {
