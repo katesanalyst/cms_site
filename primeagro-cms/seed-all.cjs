@@ -6,9 +6,28 @@ async function main() {
   console.log("=== Unified Seed: Starting ===\n");
 
   // ============================================================
+  // PART 0: Default Brand
+  // ============================================================
+  console.log("--- Part 0: Default Brand ---");
+
+  const brand = await prisma.brand.upsert({
+    where: { slug: "primeagro" },
+    update: {},
+    create: {
+      name: "Prime Agro Farms",
+      slug: "primeagro",
+      description: "Sustainable organic farming and premium produce",
+      logo: "/images/logo.svg",
+    },
+  });
+  console.log("Default brand:", brand.name, brand.id);
+
+  const BID = brand.id;
+
+  // ============================================================
   // PART 1: Base Data (from seed.cjs)
   // ============================================================
-  console.log("--- Part 1: Base Data ---");
+  console.log("\n--- Part 1: Base Data ---");
 
   const password = await bcrypt.hash("admin123", 12);
   const admin = await prisma.user.upsert({
@@ -69,8 +88,8 @@ async function main() {
   ];
 
   for (const s of settings) {
-    const existing = await prisma.siteSetting.findFirst({ where: { key: s.key } });
-    if (!existing) await prisma.siteSetting.create({ data: s });
+    const existing = await prisma.siteSetting.findFirst({ where: { key: s.key, brandId: BID } });
+    if (!existing) await prisma.siteSetting.create({ data: { ...s, brandId: BID } });
   }
   console.log(`Settings: ${settings.length} (skipped existing)`);
 
@@ -87,9 +106,9 @@ async function main() {
 
   const createdPages = {};
   for (const p of pages) {
-    const existing = await prisma.page.findFirst({ where: { slug: p.slug } });
+    const existing = await prisma.page.findFirst({ where: { slug: p.slug, brandId: BID } });
     if (existing) { createdPages[p.slug] = existing; }
-    else { const page = await prisma.page.create({ data: p }); createdPages[p.slug] = page; }
+    else { const page = await prisma.page.create({ data: { ...p, brandId: BID } }); createdPages[p.slug] = page; }
   }
   console.log(`Pages: ${pages.length} (skipped existing)`);
 
@@ -105,11 +124,11 @@ async function main() {
   ];
 
   for (const h of heroes) {
-    const existing = await prisma.hero.findFirst({ where: { pageId: h.pageId } });
+    const existing = await prisma.hero.findFirst({ where: { pageId: h.pageId, brandId: BID } });
     if (existing) {
       await prisma.hero.update({ where: { id: existing.id }, data: h });
     } else {
-      await prisma.hero.create({ data: h });
+      await prisma.hero.create({ data: { ...h, brandId: BID } });
     }
   }
   console.log(`Heroes: ${heroes.length} (upserted)`);
@@ -126,8 +145,8 @@ async function main() {
   ];
 
   for (const n of navItems) {
-    const existing = await prisma.navigation.findFirst({ where: { label: n.label } });
-    if (!existing) await prisma.navigation.create({ data: n });
+    const existing = await prisma.navigation.findFirst({ where: { label: n.label, brandId: BID } });
+    if (!existing) await prisma.navigation.create({ data: { ...n, brandId: BID } });
   }
   console.log(`Navigation: ${navItems.length} items (skipped existing)`);
 
@@ -138,8 +157,8 @@ async function main() {
   ];
   for (let i = 0; i < testimonials.length; i++) {
     const t = testimonials[i];
-    const existing = await prisma.testimonial.findFirst({ where: { clientName: t.clientName } });
-    if (!existing) await prisma.testimonial.create({ data: { ...t, order: i } });
+    const existing = await prisma.testimonial.findFirst({ where: { clientName: t.clientName, brandId: BID } });
+    if (!existing) await prisma.testimonial.create({ data: { ...t, brandId: BID, order: i } });
   }
   console.log("Testimonials: 3 (skipped existing)");
 
@@ -150,8 +169,8 @@ async function main() {
   ];
   for (let i = 0; i < team.length; i++) {
     const t = team[i];
-    const existing = await prisma.teamMember.findFirst({ where: { name: t.name } });
-    if (!existing) await prisma.teamMember.create({ data: { ...t, displayOrder: i } });
+    const existing = await prisma.teamMember.findFirst({ where: { name: t.name, brandId: BID } });
+    if (!existing) await prisma.teamMember.create({ data: { ...t, brandId: BID, displayOrder: i } });
   }
   console.log("Team: 3 (skipped existing)");
 
@@ -164,8 +183,8 @@ async function main() {
   ];
   for (let i = 0; i < faqs.length; i++) {
     const f = faqs[i];
-    const existing = await prisma.faq.findFirst({ where: { question: f.question } });
-    if (!existing) await prisma.faq.create({ data: { ...f, displayOrder: i } });
+    const existing = await prisma.faq.findFirst({ where: { question: f.question, brandId: BID } });
+    if (!existing) await prisma.faq.create({ data: { ...f, brandId: BID, displayOrder: i } });
   }
   console.log("FAQs: 5 (skipped existing)");
 
@@ -176,8 +195,8 @@ async function main() {
     { type: "contact", title: "Contact Info", items: JSON.stringify([{ icon: "phone", text: "+91 9876543210" }, { icon: "email", text: "info@primeagrofarms.com" }, { icon: "location", text: "Hyderabad, Telangana" }]), order: 3 },
   ];
   for (const f of footerSections) {
-    const existing = await prisma.footerSection.findFirst({ where: { type: f.type } });
-    if (!existing) await prisma.footerSection.create({ data: f });
+    const existing = await prisma.footerSection.findFirst({ where: { type: f.type, brandId: BID } });
+    if (!existing) await prisma.footerSection.create({ data: { ...f, brandId: BID } });
   }
   console.log("Footer: 4 sections (skipped existing)");
 
@@ -234,9 +253,9 @@ async function main() {
   let sectionsCreated = 0;
   for (const section of sections) {
     if (!section.pageId) continue;
-    const existing = await prisma.section.findFirst({ where: { pageId: section.pageId, title: section.title } });
+    const existing = await prisma.section.findFirst({ where: { pageId: section.pageId, title: section.title, brandId: BID } });
     if (!existing) {
-      await prisma.section.create({ data: section });
+      await prisma.section.create({ data: { ...section, brandId: BID } });
       sectionsCreated++;
     }
   }
@@ -256,7 +275,12 @@ async function main() {
     { title: "Organic Certification: What It Means", slug: "organic-certification-what-it-means", excerpt: "Understanding the organic certification process and why certified organic produce matters for your health.", content: "<p>Organic certification ensures that produce is grown without synthetic pesticides, fertilizers, or GMOs. In India, NPOP (National Programme for Organic Production) is the gold standard for organic certification.</p><h3>What NPOP Certification Guarantees</h3><ul><li>No synthetic chemicals used</li><li>Non-GMO seeds only</li><li>Soil health maintained through composting</li><li>Regular inspections and audits</li><li>Full traceability from farm to fork</li></ul><p>All Prime Agro Farms products carry the NPOP certification, ensuring you receive genuinely organic produce.</p>", category: "Products", author: "Priya Menon", publishedAt: "2026-05-10", published: true },
   ];
   for (const post of blogPosts) {
-    await prisma.blogPost.upsert({ where: { slug: post.slug }, update: post, create: post });
+    const existing = await prisma.blogPost.findFirst({ where: { slug: post.slug, brandId: BID } });
+    if (existing) {
+      await prisma.blogPost.update({ where: { id: existing.id }, data: post });
+    } else {
+      await prisma.blogPost.create({ data: { ...post, brandId: BID } });
+    }
   }
   console.log(`Blog: ${blogPosts.length} posts (upserted)`);
 
@@ -278,8 +302,8 @@ async function main() {
     { title: "Solar Processing Unit Interior", category: "Infrastructure", mediaType: "image", displayOrder: 15 },
   ];
   for (const item of galleryItems) {
-    const existing = await prisma.galleryItem.findFirst({ where: { title: item.title } });
-    if (!existing) await prisma.galleryItem.create({ data: item });
+    const existing = await prisma.galleryItem.findFirst({ where: { title: item.title, brandId: BID } });
+    if (!existing) await prisma.galleryItem.create({ data: { ...item, brandId: BID } });
   }
   console.log(`Gallery: ${galleryItems.length} items (skipped existing)`);
 
@@ -289,7 +313,12 @@ async function main() {
     { title: "Harvest Hills Farmland", slug: "harvest-hills-farmland", location: "Pollachi, Coimbatore District", district: "Coimbatore", state: "Tamil Nadu", totalAcreage: 200, availableAcreage: 75, soilType: "Red Sandy Loam", topography: "Rolling Hills", fencingStatus: "Stone Wall + Barbed Wire", irrigationType: "Drip Irrigation", waterSource: "3 Bore Wells + Stream Water", waterAvailability: "Year-round with stream", waterQuality: "Excellent natural spring water", electricity: true, roadAccess: true, storageFacility: true, farmHouse: true, infrastructure: "Farm house, storage godown, packaging shed, security", pricePerAcre: 1200000, totalPrice: 1200000, priceNegotiable: false, legalClearTitle: true, documentation: "Clear title, EC, Survey, Patta", registrationStatus: "Ready for registration", farmSetupAssistance: true, plantationSupport: true, irrigationPlanning: true, maintenanceGuidance: true, developmentServices: "Premium farm setup with mango plantation, organic certification, full maintenance support", status: "Available", featuredImage: "/images/harvest-hills.jpg" },
   ];
   for (const land of farmlands) {
-    await prisma.farmLand.upsert({ where: { slug: land.slug }, update: land, create: land });
+    const existing = await prisma.farmLand.findFirst({ where: { slug: land.slug, brandId: BID } });
+    if (existing) {
+      await prisma.farmLand.update({ where: { id: existing.id }, data: land });
+    } else {
+      await prisma.farmLand.create({ data: { ...land, brandId: BID } });
+    }
   }
   console.log(`Farmlands: ${farmlands.length} (upserted)`);
 
@@ -301,7 +330,12 @@ async function main() {
     { title: "Organic Cold-Pressed Coconut Oil", slug: "organic-cold-pressed-coconut-oil", shortDesc: "Pure cold-pressed coconut oil from organic coconuts.", fullDesc: "Extracted using traditional cold-press method from organic coconuts grown on our farms. No refining, no chemicals, no heat processing. Pure virgin coconut oil for cooking and wellness.", price: 600, unit: "per litre", minOrder: 1, seasonAvailable: "Year-round", inStock: true, certification: "NPOP Organic Certified", qualityGrade: "Virgin Cold-Pressed", benefits: "Heart-healthy, boosts immunity, good for skin and hair, enhances cooking flavor.", nutritionalInfo: "Per tablespoon: Calories 121, Saturated Fat 12g, MCTs 60%", storageInfo: "Store in cool, dry place. Solidifies below 24°C. Shelf life 18 months." },
   ];
   for (const product of products) {
-    await prisma.farmProduct.upsert({ where: { slug: product.slug }, update: product, create: product });
+    const existing = await prisma.farmProduct.findFirst({ where: { slug: product.slug, brandId: BID } });
+    if (existing) {
+      await prisma.farmProduct.update({ where: { id: existing.id }, data: product });
+    } else {
+      await prisma.farmProduct.create({ data: { ...product, brandId: BID } });
+    }
   }
   console.log(`Products: ${products.length} (upserted)`);
 
@@ -312,7 +346,12 @@ async function main() {
     { name: "Farm Visit & Experience", slug: "farm-visit-experience", shortDesc: "Experience organic farming firsthand with guided farm tours.", fullDesc: "Visit our farms in Coimbatore and experience organic farming firsthand. Walk through our plantations, visit our solar processing unit, and taste fresh organic produce.", icon: "🌾", pricingModel: "Per person", price: 500, duration: "Half day", features: "Guided tour, Plantation walk, Solar unit visit, Fresh produce tasting, Organic lunch", displayOrder: 4, featured: false, showOnHome: true },
   ];
   for (const service of services) {
-    await prisma.service.upsert({ where: { slug: service.slug }, update: service, create: service });
+    const existing = await prisma.service.findFirst({ where: { slug: service.slug, brandId: BID } });
+    if (existing) {
+      await prisma.service.update({ where: { id: existing.id }, data: service });
+    } else {
+      await prisma.service.create({ data: { ...service, brandId: BID } });
+    }
   }
   console.log(`Services: ${services.length} (upserted)`);
 

@@ -1,5 +1,27 @@
 const CMS_URL = process.env.CMS_URL || "http://localhost:3334";
 
+let cachedBrandId: string | null = null;
+
+async function getBrandId(): Promise<string> {
+  if (cachedBrandId) return cachedBrandId;
+  try {
+    const res = await fetch(`${CMS_URL}/api/admin/brands`);
+    const brands = await res.json();
+    const defaultBrand = Array.isArray(brands) ? brands.find((b: any) => b.slug === "primeagro") || brands[0] : null;
+    if (defaultBrand) {
+      cachedBrandId = defaultBrand.id;
+      return cachedBrandId!;
+    }
+  } catch {}
+  return "";
+}
+
+async function cmsFetch<T = any>(path: string): Promise<T> {
+  const brandId = await getBrandId();
+  const sep = path.includes("?") ? "&" : "?";
+  return fetch(`${CMS_URL}${path}${sep}brandId=${brandId}`).then((r) => r.json()).catch(() => ({} as T));
+}
+
 export interface SanityImage {
   asset: { url: string };
   alt?: string;
@@ -25,8 +47,8 @@ export const client = {
 
 export async function fetchHomePage(): Promise<Record<string, any>> {
   const [settings, testimonials] = await Promise.all([
-    fetch(`${CMS_URL}/api/settings`).then((r) => r.json()).catch(() => ({})),
-    fetch(`${CMS_URL}/api/testimonials`).then((r) => r.json()).catch(() => []),
+    cmsFetch(`/api/settings`),
+    cmsFetch(`/api/testimonials`),
   ]);
 
   return {
@@ -76,7 +98,7 @@ export async function fetchHomePage(): Promise<Record<string, any>> {
 }
 
 export async function fetchTestimonials() {
-  const items = await fetch(`${CMS_URL}/api/testimonials`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/testimonials`);
   return items.slice(0, 6).map((t: any) => ({
     ...fid(t.id),
     clientName: t.clientName,
@@ -88,7 +110,7 @@ export async function fetchTestimonials() {
 }
 
 export async function fetchTeamMembers() {
-  const items = await fetch(`${CMS_URL}/api/team`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/team`);
   return items.map((t: any) => ({
     ...fid(t.id),
     name: t.name,
@@ -100,7 +122,7 @@ export async function fetchTeamMembers() {
 }
 
 export async function fetchGallery() {
-  const items = await fetch(`${CMS_URL}/api/gallery`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/gallery`);
   return items.map((g: any) => ({
     ...fid(g.id),
     title: g.title,
@@ -114,7 +136,7 @@ export async function fetchGallery() {
 }
 
 export async function fetchBlogPosts() {
-  const items = await fetch(`${CMS_URL}/api/blog`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/blog`);
   return items.map((b: any) => ({
     ...fid(b.id),
     title: b.title,
@@ -127,7 +149,7 @@ export async function fetchBlogPosts() {
 }
 
 export async function fetchFAQs() {
-  const items = await fetch(`${CMS_URL}/api/faqs`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/faqs`);
   return items.map((f: any) => ({
     ...fid(f.id),
     question: f.question,
@@ -137,7 +159,7 @@ export async function fetchFAQs() {
 }
 
 export async function fetchSiteSettings() {
-  const data = await fetch(`${CMS_URL}/api/settings`).then((r) => r.json()).catch(() => ({}));
+  const data = await cmsFetch(`/api/settings`);
   return {
     company_name: data.companyName || "Prime Agro Farms",
     tagline: data.tagline || "Sustainable Farming for a Healthier Future",
@@ -189,7 +211,7 @@ export async function fetchSiteSettings() {
 }
 
 export async function fetchFarmLands() {
-  const items = await fetch(`${CMS_URL}/api/lands`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/lands`);
   return items.map((l: any) => ({
     ...fid(l.id),
     name: l.title,
@@ -212,7 +234,7 @@ export async function fetchFarmLands() {
 }
 
 export async function fetchNavigation() {
-  const items = await fetch(`${CMS_URL}/api/navigation`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/navigation`);
   return (Array.isArray(items) ? items : [])
     .filter((n: any) => n.published)
     .sort((a: any, b: any) => a.order - b.order)
@@ -225,7 +247,7 @@ export async function fetchNavigation() {
 }
 
 export async function fetchFooterSections() {
-  const items = await fetch(`${CMS_URL}/api/footer`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/footer`);
   const sections = (Array.isArray(items) ? items : [])
     .filter((s: any) => s.published)
     .sort((a: any, b: any) => a.order - b.order)
@@ -245,7 +267,7 @@ export async function fetchFooterSections() {
 }
 
 export async function fetchPageBySlug(slug: string) {
-  const page = await fetch(`${CMS_URL}/api/pages/${slug}`).then((r) => r.json()).catch(() => null);
+  const page = await cmsFetch(`/api/pages/${slug}`);
   if (!page || page.error) return null;
   return {
     id: page.id,
@@ -287,9 +309,9 @@ export async function fetchPageBySlug(slug: string) {
 }
 
 export async function fetchPageMeta(slug: string) {
-  const page = await fetch(`${CMS_URL}/api/pages/${slug}`).then((r) => r.json()).catch(() => null);
+  const page = await cmsFetch(`/api/pages/${slug}`);
   if (!page || page.error) return null;
-  const settings = await fetch(`${CMS_URL}/api/settings`).then((r) => r.json()).catch(() => ({}));
+  const settings = await cmsFetch(`/api/settings`);
   return {
     title: page.metaTitle || settings.defaultMetaTitle || "",
     description: page.metaDescription || settings.defaultMetaDescription || "",
@@ -298,7 +320,7 @@ export async function fetchPageMeta(slug: string) {
 }
 
 export async function fetchServices() {
-  const items = await fetch(`${CMS_URL}/api/services`).then((r) => r.json()).catch(() => []);
+  const items = await cmsFetch(`/api/services`);
   return items.map((s: any) => ({
     id: s.id,
     name: s.name,

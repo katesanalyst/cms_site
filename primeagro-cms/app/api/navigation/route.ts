@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getBrandIdForAPI } from "@/lib/brand-server";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const brandId = await getBrandIdForAPI(request);
   const items = await prisma.navigation.findMany({
-    where: { published: true },
+    where: { brandId, published: true },
     orderBy: { order: "asc" },
   });
   return NextResponse.json(items);

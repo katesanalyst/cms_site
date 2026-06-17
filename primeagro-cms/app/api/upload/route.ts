@@ -4,13 +4,15 @@ import path from "path";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getBrandIdForAPI } from "@/lib/brand-server";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const formData = await req.formData();
+    const brandId = await getBrandIdForAPI(request);
+    const formData = await request.formData();
     const file = formData.get("file") as File;
     if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
@@ -30,6 +32,7 @@ export async function POST(req: Request) {
         url: `/uploads/${filename}`,
         mimeType: file.type,
         size: file.size,
+        brandId,
       },
     });
 

@@ -7,6 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Brand {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  subdomain       String?  @unique
+  domain          String?  @unique
+  logo            String?
+  favicon         String?
+  description     String?
+  primaryColor    String   @default("#3a6b35")
+  secondaryColor  String   @default("#d4a853")
+  accentColor     String   @default("#faf8f5")
+  fontHeading     String   @default("Playfair Display")
+  fontBody        String   @default("Inter")
+  industry        String?
+  aiContext       String?
+  published       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  pages           Page[]
+  sections        Section[]
+  heroes          Hero[]
+  products        FarmProduct[]
+  farmlands       FarmLand[]
+  testimonials    Testimonial[]
+  teamMembers     TeamMember[]
+  galleryItems    GalleryItem[]
+  blogPosts       BlogPost[]
+  services        Service[]
+  faqs            Faq[]
+  settings        SiteSetting[]
+  navigation      Navigation[]
+  footerSections  FooterSection[]
+  leads           Lead[]
+  media           Media[]
+  seoMeta         SeoMeta[]
+  newsletterSubscribers NewsletterSubscriber[]
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -19,7 +59,9 @@ model User {
 
 model Page {
   id              String    @id @default(cuid())
-  slug            String    @unique
+  brandId         String
+  brand           Brand     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  slug            String
   title           String
   metaTitle       String?
   metaDescription String?
@@ -29,10 +71,14 @@ model Page {
   updatedAt       DateTime  @updatedAt
   sections        Section[]
   hero            Hero?
+
+  @@unique([brandId, slug])
 }
 
 model Section {
   id            String   @id @default(cuid())
+  brandId       String
+  brand         Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   pageId        String
   page          Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
   type          String
@@ -52,6 +98,8 @@ model Section {
 
 model Hero {
   id             String   @id @default(cuid())
+  brandId        String
+  brand          Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   pageId         String   @unique
   page           Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
   tag            String?
@@ -73,8 +121,10 @@ model Hero {
 
 model FarmProduct {
   id              String   @id @default(cuid())
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   title           String
-  slug            String   @unique
+  slug            String
   shortDesc       String?
   fullDesc        String?
   price           Float?
@@ -95,12 +145,16 @@ model FarmProduct {
   published       Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([brandId, slug])
 }
 
 model FarmLand {
   id                  String   @id @default(cuid())
+  brandId             String
+  brand               Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   title               String
-  slug                String   @unique
+  slug                String
   location            String
   district            String?
   state               String?
@@ -145,10 +199,14 @@ model FarmLand {
   published           Boolean  @default(true)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+
+  @@unique([brandId, slug])
 }
 
 model Testimonial {
   id          String   @id @default(cuid())
+  brandId     String
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   clientName  String
   company     String?
   location    String?
@@ -166,6 +224,8 @@ model Testimonial {
 
 model TeamMember {
   id             String   @id @default(cuid())
+  brandId        String
+  brand          Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   name           String
   role           String
   department     String?
@@ -184,6 +244,8 @@ model TeamMember {
 
 model GalleryItem {
   id              String   @id @default(cuid())
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   title           String?
   mediaType       String   @default("image")
   image           String?
@@ -204,8 +266,10 @@ model GalleryItem {
 
 model BlogPost {
   id              String   @id @default(cuid())
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   title           String
-  slug            String   @unique
+  slug            String
   excerpt         String?
   content         String?
   featuredImage   String?
@@ -218,12 +282,16 @@ model BlogPost {
   published       Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([brandId, slug])
 }
 
 model Service {
   id              String   @id @default(cuid())
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   name            String
-  slug            String   @unique
+  slug            String
   shortDesc       String?
   fullDesc        String?
   icon            String?
@@ -237,10 +305,14 @@ model Service {
   showOnHome      Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([brandId, slug])
 }
 
 model Faq {
   id          String   @id @default(cuid())
+  brandId     String
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   question    String
   answer      String
   category    String?
@@ -253,16 +325,22 @@ model Faq {
 
 model SiteSetting {
   id        String   @id @default(cuid())
-  key       String   @unique
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  key       String
   value     String?
   type      String   @default("text")
   group     String   @default("general")
   createdAt DateTime @default(now())
   updatedAt DateTime?
+
+  @@unique([brandId, key])
 }
 
 model Navigation {
   id        String   @id @default(cuid())
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   label     String
   url       String
   order     Int      @default(0)
@@ -275,6 +353,8 @@ model Navigation {
 
 model FooterSection {
   id        String   @id @default(cuid())
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   type      String
   title     String?
   items     String
@@ -285,6 +365,8 @@ model FooterSection {
 
 model Lead {
   id        String   @id @default(cuid())
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   name      String
   phone     String
   email     String?
@@ -301,6 +383,8 @@ model Lead {
 
 model Media {
   id        String   @id @default(cuid())
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   filename  String
   url       String
   mimeType  String
@@ -311,7 +395,9 @@ model Media {
 
 model SeoMeta {
   id              String   @id @default(cuid())
-  pageType        String   @unique
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  pageType        String
   title           String?
   description     String?
   keywords        String?
@@ -321,13 +407,19 @@ model SeoMeta {
   aiGenerated     Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([brandId, pageType])
 }
 
 model NewsletterSubscriber {
   id        String   @id @default(cuid())
-  email     String   @unique
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  email     String
   name      String?
   source    String?  @default("footer")
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  @@unique([brandId, email])
 }

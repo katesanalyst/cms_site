@@ -23,7 +23,8 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
 COPY --from=builder /app/prisma/seed.cjs ./seed.cjs
 COPY --from=builder /app/next.config.ts ./next.config.ts
+COPY --from=builder /app/seed-all.cjs ./seed-all.cjs
 
 EXPOSE 3334
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node seed.cjs && node_modules/.bin/next start --port 3334"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node seed-all.cjs && node_modules/.bin/next start --port 3334"]
