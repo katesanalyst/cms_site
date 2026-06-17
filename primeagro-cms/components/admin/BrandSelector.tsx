@@ -9,9 +9,13 @@ export default function BrandSelector() {
   useEffect(() => {
     if (brand?.id) {
       document.cookie = `brandId=${brand.id}; path=/; max-age=31536000`;
+    } else if (!loading && brands.length === 1) {
+      // Auto-select the only brand
+      setBrandId(brands[0].id);
     }
-  }, [brand?.id]);
+  }, [brand?.id, brands, loading, setBrandId]);
 
+  // Hide selector when only 1 brand
   if (loading || brands.length <= 1) return null;
 
   return (

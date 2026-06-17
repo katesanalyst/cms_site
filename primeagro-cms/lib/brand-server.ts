@@ -27,12 +27,18 @@ export async function getBrandIdForAPI(request: Request): Promise<string> {
   const match = cookieHeader.match(/brandId=([^;]+)/);
   if (match) return match[1];
 
-  // Fallback to default brand
-  const defaultBrand = await prisma.brand.findFirst({ where: { slug: "primeagro" } });
+  // Check query param (from frontend cmsFetch)
+  const url = new URL(request.url);
+  const queryBrandId = url.searchParams.get("brandId");
+  if (queryBrandId) return queryBrandId;
+
+  // Fallback to first published brand
+  const defaultBrand = await prisma.brand.findFirst({ where: { published: true }, orderBy: { createdAt: "asc" } });
   if (defaultBrand) return defaultBrand.id;
 
+  // Last resort: any brand
   const anyBrand = await prisma.brand.findFirst();
   if (anyBrand) return anyBrand.id;
 
-  throw new Error("No brand found.");
+  throw new Error("No brand found. Create a brand first.");
 }

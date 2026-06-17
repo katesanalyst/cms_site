@@ -16,3 +16,21 @@ export async function POST(req: Request) {
   const brand = await prisma.brand.create({ data });
   return NextResponse.json(brand);
 }
+
+export async function PUT(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id, ...data } = await req.json();
+  const brand = await prisma.brand.update({ where: { id }, data });
+  return NextResponse.json(brand);
+}
+
+export async function DELETE(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id } = await req.json();
+  await prisma.brand.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
+}
