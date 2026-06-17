@@ -1,21 +1,4 @@
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: primeagro
-      POSTGRES_USER: primeagro
-      POSTGRES_PASSWORD: primeagro123
-    volumes:
-      - pg-data:/var/lib/postgresql/data
-    ports:
-      - "5435:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U primeagro -d primeagro"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
-
+﻿services:
   cms:
     build:
       context: ../primeagro-cms
@@ -23,15 +6,13 @@ services:
     ports:
       - "3334:3334"
     volumes:
+      - cms-data:/app/data
       - cms-uploads:/app/public/uploads
     environment:
-      - DATABASE_URL=postgresql://primeagro:primeagro123@db:5432/primeagro
+      - DATABASE_URL=file:/app/data/dev.db
       - NEXTAUTH_SECRET=primeagro-cms-secret-change-in-production
       - NEXTAUTH_URL=http://localhost:3334
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-    depends_on:
-      db:
-        condition: service_healthy
     restart: unless-stopped
 
   frontend:
@@ -48,5 +29,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  pg-data:
+  cms-data:
   cms-uploads:

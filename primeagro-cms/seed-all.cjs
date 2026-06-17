@@ -6,28 +6,9 @@ async function main() {
   console.log("=== Unified Seed: Starting ===\n");
 
   // ============================================================
-  // PART 0: Default Brand
+  // PART 1: Base Data
   // ============================================================
-  console.log("--- Part 0: Default Brand ---");
-
-  const brand = await prisma.brand.upsert({
-    where: { slug: "primeagro" },
-    update: {},
-    create: {
-      name: "Prime Agro Farms",
-      slug: "primeagro",
-      description: "Sustainable organic farming and premium produce",
-      logo: "/images/logo.svg",
-    },
-  });
-  console.log("Default brand:", brand.name, brand.id);
-
-  const BID = brand.id;
-
-  // ============================================================
-  // PART 1: Base Data (from seed.cjs)
-  // ============================================================
-  console.log("\n--- Part 1: Base Data ---");
+  console.log("--- Part 1: Base Data ---");
 
   const password = await bcrypt.hash("admin123", 12);
   const admin = await prisma.user.upsert({
@@ -88,8 +69,8 @@ async function main() {
   ];
 
   for (const s of settings) {
-    const existing = await prisma.siteSetting.findFirst({ where: { key: s.key, brandId: BID } });
-    if (!existing) await prisma.siteSetting.create({ data: { ...s, brandId: BID } });
+    const existing = await prisma.siteSetting.findFirst({ where: { key: s.key } });
+    if (!existing) await prisma.siteSetting.create({ data: s });
   }
   console.log(`Settings: ${settings.length} (skipped existing)`);
 
@@ -106,9 +87,9 @@ async function main() {
 
   const createdPages = {};
   for (const p of pages) {
-    const existing = await prisma.page.findFirst({ where: { slug: p.slug, brandId: BID } });
+    const existing = await prisma.page.findFirst({ where: { slug: p.slug } });
     if (existing) { createdPages[p.slug] = existing; }
-    else { const page = await prisma.page.create({ data: { ...p, brandId: BID } }); createdPages[p.slug] = page; }
+    else { const page = await prisma.page.create({ data: p }); createdPages[p.slug] = page; }
   }
   console.log(`Pages: ${pages.length} (skipped existing)`);
 
@@ -124,11 +105,11 @@ async function main() {
   ];
 
   for (const h of heroes) {
-    const existing = await prisma.hero.findFirst({ where: { pageId: h.pageId, brandId: BID } });
+    const existing = await prisma.hero.findFirst({ where: { pageId: h.pageId } });
     if (existing) {
       await prisma.hero.update({ where: { id: existing.id }, data: h });
     } else {
-      await prisma.hero.create({ data: { ...h, brandId: BID } });
+      await prisma.hero.create({ data: h });
     }
   }
   console.log(`Heroes: ${heroes.length} (upserted)`);
@@ -145,8 +126,8 @@ async function main() {
   ];
 
   for (const n of navItems) {
-    const existing = await prisma.navigation.findFirst({ where: { label: n.label, brandId: BID } });
-    if (!existing) await prisma.navigation.create({ data: { ...n, brandId: BID } });
+    const existing = await prisma.navigation.findFirst({ where: { label: n.label } });
+    if (!existing) await prisma.navigation.create({ data: n });
   }
   console.log(`Navigation: ${navItems.length} items (skipped existing)`);
 
@@ -157,8 +138,8 @@ async function main() {
   ];
   for (let i = 0; i < testimonials.length; i++) {
     const t = testimonials[i];
-    const existing = await prisma.testimonial.findFirst({ where: { clientName: t.clientName, brandId: BID } });
-    if (!existing) await prisma.testimonial.create({ data: { ...t, brandId: BID, order: i } });
+    const existing = await prisma.testimonial.findFirst({ where: { clientName: t.clientName } });
+    if (!existing) await prisma.testimonial.create({ data: { ...t, order: i } });
   }
   console.log("Testimonials: 3 (skipped existing)");
 
@@ -169,8 +150,8 @@ async function main() {
   ];
   for (let i = 0; i < team.length; i++) {
     const t = team[i];
-    const existing = await prisma.teamMember.findFirst({ where: { name: t.name, brandId: BID } });
-    if (!existing) await prisma.teamMember.create({ data: { ...t, brandId: BID, displayOrder: i } });
+    const existing = await prisma.teamMember.findFirst({ where: { name: t.name } });
+    if (!existing) await prisma.teamMember.create({ data: { ...t, displayOrder: i } });
   }
   console.log("Team: 3 (skipped existing)");
 
@@ -183,8 +164,8 @@ async function main() {
   ];
   for (let i = 0; i < faqs.length; i++) {
     const f = faqs[i];
-    const existing = await prisma.faq.findFirst({ where: { question: f.question, brandId: BID } });
-    if (!existing) await prisma.faq.create({ data: { ...f, brandId: BID, displayOrder: i } });
+    const existing = await prisma.faq.findFirst({ where: { question: f.question } });
+    if (!existing) await prisma.faq.create({ data: { ...f, displayOrder: i } });
   }
   console.log("FAQs: 5 (skipped existing)");
 
@@ -195,13 +176,13 @@ async function main() {
     { type: "contact", title: "Contact Info", items: JSON.stringify([{ icon: "phone", text: "+91 9876543210" }, { icon: "email", text: "info@primeagrofarms.com" }, { icon: "location", text: "Hyderabad, Telangana" }]), order: 3 },
   ];
   for (const f of footerSections) {
-    const existing = await prisma.footerSection.findFirst({ where: { type: f.type, brandId: BID } });
-    if (!existing) await prisma.footerSection.create({ data: { ...f, brandId: BID } });
+    const existing = await prisma.footerSection.findFirst({ where: { type: f.type } });
+    if (!existing) await prisma.footerSection.create({ data: f });
   }
   console.log("Footer: 4 sections (skipped existing)");
 
   // ============================================================
-  // PART 2: Sections (from seed-sections.cjs)
+  // PART 2: Sections
   // ============================================================
   console.log("\n--- Part 2: Page Sections ---");
 
@@ -212,40 +193,32 @@ async function main() {
   }
 
   const sections = [
-    // HOMEPAGE
     { pageId: pageMap["homepage"], type: "story", title: "Farming Focus", badge: "What We Do", badgeIcon: "🌾", heading: "The land gives what the land is given. We give it everything.", italicWords: "everything", text: "Three pillars of sustainable agriculture — premium fig cultivation, organic dehydration, and long-term mango plantations. Each one rooted in patience, harvested with care.", align: "center", light: false, order: 0, items: JSON.stringify([{ icon: "🌿", title: "Premium Dyanna California Anjeera", text: "Exotic anjeera cultivated with organic methods for superior quality and taste." }, { icon: "🥬", title: "Organic Dehydrated Vegetables", text: "Solar-dried vegetables preserving nutrients and flavor for year-round nutrition." }, { icon: "🥭", title: "Mango Plantation", text: "Premium mango varieties cultivated with sustainable farming practices." }]) },
     { pageId: pageMap["homepage"], type: "story", title: "Sustainability", badge: "Sustainability", badgeIcon: "☀️", heading: "We do not take from the sun. We simply ask it to help.", italicWords: "help", text: "Harnessing the power of the sun for sustainable farming and healthy living.", align: "left", light: false, order: 1, items: JSON.stringify(["Solar Drying Technology", "Organic Processing", "Eco-friendly Infrastructure", "Water-conscious Farming", "2027 Retail Expansion Vision"]) },
     { pageId: pageMap["homepage"], type: "stats", title: "Stats", badge: "", badgeIcon: "", heading: "", text: "", align: "center", light: false, order: 2, items: JSON.stringify([{ num: "100%", label: "Organic Practices" }, { num: "50+", label: "Acres of Cultivation" }, { num: "1000+", label: "Happy Customers" }, { num: "2027", label: "Retail Expansion Goal" }]) },
     { pageId: pageMap["homepage"], type: "process", title: "Process", badge: "Our Process", badgeIcon: "🌱", heading: "The bees fill the comb when they are ready. We wait.", italicWords: "ready, wait", text: "From seed to table, every step is guided by nature and patience. We do not rush the harvest. We wait until the land says it is time.", align: "center", light: false, order: 3, items: JSON.stringify([{ num: "01", title: "Seeding & Growing", text: "Organic seeds, natural fertilizers, traditional wisdom." }, { num: "02", title: "Harvesting", text: "Hand-picked at peak ripeness for maximum nutrition." }, { num: "03", title: "Processing", text: "Solar dehydration and cold storage for freshness." }, { num: "04", title: "Packaging", text: "Eco-friendly packaging delivered to your doorstep." }]) },
     { pageId: pageMap["homepage"], type: "cta", title: "CTA", badge: "Get Started", badgeIcon: "🌿", heading: "We simply obey the land. And the land obeys us back.", italicWords: "land, back", text: "Connect with us today and take the first step towards sustainable farming.", align: "center", light: true, order: 4, items: "[]" },
 
-    // ABOUT PAGE
     { pageId: pageMap["about"], type: "story", title: "Our Story", badge: "Our Story", badgeIcon: "🌱", heading: "We are not a factory. We are not a farm. We are forest keepers.", italicWords: "factory, farm", text: "Prime Agro Farms is a forward-thinking agricultural enterprise dedicated to sustainable farming, premium organic produce, and assisted farmland ownership. Based in Telangana, we cultivate premium Dyanna California Anjeera (figs), organic vegetables, and mangoes using eco-friendly methods.\n\nOur mission is to nurture the land, grow wellness, and create futures — for our customers, our community, and the planet.\n\nWith 50+ acres under cultivation and a growing network of farmland owners, we are at the forefront of the organic farming revolution in India.", align: "left", light: false, order: 0, items: JSON.stringify([{ icon: "🌿", title: "Sustainability", text: "We practice and promote farming methods that protect the environment, conserve water, and maintain soil health for future generations." }, { icon: "🔍", title: "Transparency", text: "Clear pricing, verified land titles, honest communication — we believe in full transparency in every transaction and relationship." }, { icon: "⭐", title: "Quality", text: "From seed to harvest, we maintain the highest standards of organic cultivation to deliver premium quality produce to our customers." }]) },
     { pageId: pageMap["about"], type: "story", title: "Vision", badge: "", badgeIcon: "", heading: "Our Vision 2027", italicWords: "", text: "To establish a self-sustained cultivation and solar processing ecosystem with our own retail brand for organic produce, serving health-conscious consumers across India.", align: "center", light: false, order: 1, items: "[]" },
     { pageId: pageMap["about"], type: "story", title: "Values", badge: "Our Values", badgeIcon: "⭐", heading: "What we believe is what we grow.", italicWords: "believe, grow", text: "", align: "center", light: false, order: 2, items: "[]" },
     { pageId: pageMap["about"], type: "story", title: "Team", badge: "Our Team", badgeIcon: "👥", heading: "The hands that tend the hives have never rushed.", italicWords: "rushed", text: "", align: "center", light: false, order: 3, items: "[]" },
 
-    // CONTACT PAGE
     { pageId: pageMap["contact"], type: "story", title: "Contact Info", badge: "Get in Touch", badgeIcon: "📞", heading: "Write to us. We read every word.", italicWords: "every word", text: "", align: "center", light: false, order: 0, items: "[]" },
     { pageId: pageMap["contact"], type: "faq", title: "FAQs", badge: "FAQs", badgeIcon: "❓", heading: "The questions people ask are the questions worth answering.", italicWords: "worth answering", text: "", align: "center", light: false, order: 1, items: "[]" },
 
-    // BLOG PAGE
     { pageId: pageMap["blog"], type: "story", title: "Blog", badge: "Blog", badgeIcon: "📝", heading: "Notes from the field. Stories the soil whispered.", italicWords: "whispered", text: "", align: "center", light: false, order: 0, items: "[]" },
 
-    // FARMING FOCUS PAGE
     { pageId: pageMap["farming-focus"], type: "benefits", title: "What We Offer", badge: "What We Offer", badgeIcon: "🌾", heading: "We do not just sell land. We grow futures.", italicWords: "futures", text: "Complete farm development support from selection to harvest.", align: "center", light: false, order: 0, items: JSON.stringify([{ icon: "🏗️", title: "Farm Setup Assistance", text: "End-to-end support in planning and setting up your dream farm from scratch" }, { icon: "💧", title: "Irrigation Planning", text: "Professional irrigation system design for optimal water management" }, { icon: "🌱", title: "Plantation Support", text: "Expert guidance on crop selection and organic cultivation methods" }, { icon: "🔧", title: "Farm Maintenance", text: "Ongoing farm maintenance services for productive land" }, { icon: "📊", title: "Harvest & Yield Support", text: "Assistance with harvest planning and produce marketing" }, { icon: "📜", title: "Legal & Documentation", text: "Complete legal support including title verification and registration" }]) },
     { pageId: pageMap["farming-focus"], type: "why-choose", title: "Why Prime Agro", badge: "Why Prime Agro", badgeIcon: "⭐", heading: "Trust is not sold. It is grown, slowly, season by season.", italicWords: "grown, slowly", text: "", align: "center", light: false, order: 1, items: JSON.stringify([{ icon: "⚖️", title: "Legal & Transparent", text: "Clear titles, transparent pricing, complete legal support" }, { icon: "👨‍🌾", title: "Expert Farm Support", text: "10+ years of agricultural expertise at your service" }, { icon: "📈", title: "High ROI Potential", text: "Premium organic produce ensures excellent returns" }, { icon: "🌿", title: "Long-term Sustainability", text: "Eco-friendly practices for lasting agricultural value" }]) },
     { pageId: pageMap["farming-focus"], type: "cta", title: "CTA", badge: "Get Started", badgeIcon: "🌿", heading: "Every forest began with a single seed. Yours begins here.", italicWords: "single seed, here", text: "Take the first step towards sustainable farming and a greener future.", align: "center", light: true, order: 2, items: "[]" },
 
-    // SUSTAINABILITY PAGE
     { pageId: pageMap["sustainability"], type: "story", title: "Solar Technology", badge: "Solar Technology", badgeIcon: "☀️", heading: "The sun does the work. We simply hold the jar.", italicWords: "work, jar", text: "We harness the power of the sun for natural dehydration of our organic produce. Our solar drying technology preserves nutrients naturally without chemical preservatives, reducing energy consumption and carbon footprint.", align: "center", light: false, order: 0, items: JSON.stringify([{ icon: "💧", title: "Water Conservation", text: "Drip irrigation systems across all farmlands reduce water usage by up to 60% compared to traditional flood irrigation." }, { icon: "♻️", title: "Zero Waste", text: "Organic waste is composted and reused as natural fertilizer. We strive for a closed-loop farming ecosystem." }, { icon: "🌍", title: "Carbon Footprint", text: "Local distribution networks minimize transportation emissions. Our solar processing facility operates carbon-neutral." }]) },
     { pageId: pageMap["sustainability"], type: "stats", title: "Stats", badge: "", badgeIcon: "", heading: "", text: "", align: "center", light: false, order: 1, items: JSON.stringify([{ num: "60%", label: "Less Water Usage" }, { num: "100%", label: "Solar Processing" }, { num: "0", label: "Chemical Preservatives" }]) },
     { pageId: pageMap["sustainability"], type: "cta", title: "CTA", badge: "Join Us", badgeIcon: "🌍", heading: "A forest that is loved is a forest that is kept.", italicWords: "", text: "Be part of a greener future. Invest in organic farmland and support sustainable agriculture.", align: "center", light: true, order: 2, items: "[]" },
 
-    // FARMLANDS PAGE
     { pageId: pageMap["farmlands"], type: "story", title: "Available Lands", badge: "Available Lands", badgeIcon: "🏞️", heading: "Every plot of earth has a story. These are waiting for yours.", italicWords: "yours", text: "", align: "center", light: false, order: 0, items: "[]" },
 
-    // GALLERY PAGE
     { pageId: pageMap["gallery"], type: "story", title: "Gallery", badge: "Gallery", badgeIcon: "📷", heading: "A walk through the forest tells you everything a brochure cannot.", italicWords: "cannot", text: "", align: "center", light: false, order: 0, items: "[]" },
     { pageId: pageMap["gallery"], type: "cta", title: "CTA", badge: "Visit Us", badgeIcon: "🌿", heading: "The forest does not show itself through a screen. Come walk it.", italicWords: "walk it", text: "Schedule a farm visit and see our operations firsthand.", align: "center", light: true, order: 1, items: "[]" },
   ];
@@ -253,16 +226,16 @@ async function main() {
   let sectionsCreated = 0;
   for (const section of sections) {
     if (!section.pageId) continue;
-    const existing = await prisma.section.findFirst({ where: { pageId: section.pageId, title: section.title, brandId: BID } });
+    const existing = await prisma.section.findFirst({ where: { pageId: section.pageId, title: section.title } });
     if (!existing) {
-      await prisma.section.create({ data: { ...section, brandId: BID } });
+      await prisma.section.create({ data: section });
       sectionsCreated++;
     }
   }
   console.log(`Sections: ${sectionsCreated} created (skipped existing)`);
 
   // ============================================================
-  // PART 3: Content (from seed-content.cjs)
+  // PART 3: Content
   // ============================================================
   console.log("\n--- Part 3: Content Data ---");
 
@@ -275,11 +248,11 @@ async function main() {
     { title: "Organic Certification: What It Means", slug: "organic-certification-what-it-means", excerpt: "Understanding the organic certification process and why certified organic produce matters for your health.", content: "<p>Organic certification ensures that produce is grown without synthetic pesticides, fertilizers, or GMOs. In India, NPOP (National Programme for Organic Production) is the gold standard for organic certification.</p><h3>What NPOP Certification Guarantees</h3><ul><li>No synthetic chemicals used</li><li>Non-GMO seeds only</li><li>Soil health maintained through composting</li><li>Regular inspections and audits</li><li>Full traceability from farm to fork</li></ul><p>All Prime Agro Farms products carry the NPOP certification, ensuring you receive genuinely organic produce.</p>", category: "Products", author: "Priya Menon", publishedAt: "2026-05-10", published: true },
   ];
   for (const post of blogPosts) {
-    const existing = await prisma.blogPost.findFirst({ where: { slug: post.slug, brandId: BID } });
+    const existing = await prisma.blogPost.findFirst({ where: { slug: post.slug } });
     if (existing) {
       await prisma.blogPost.update({ where: { id: existing.id }, data: post });
     } else {
-      await prisma.blogPost.create({ data: { ...post, brandId: BID } });
+      await prisma.blogPost.create({ data: post });
     }
   }
   console.log(`Blog: ${blogPosts.length} posts (upserted)`);
@@ -302,8 +275,8 @@ async function main() {
     { title: "Solar Processing Unit Interior", category: "Infrastructure", mediaType: "image", displayOrder: 15 },
   ];
   for (const item of galleryItems) {
-    const existing = await prisma.galleryItem.findFirst({ where: { title: item.title, brandId: BID } });
-    if (!existing) await prisma.galleryItem.create({ data: { ...item, brandId: BID } });
+    const existing = await prisma.galleryItem.findFirst({ where: { title: item.title } });
+    if (!existing) await prisma.galleryItem.create({ data: item });
   }
   console.log(`Gallery: ${galleryItems.length} items (skipped existing)`);
 
@@ -313,11 +286,11 @@ async function main() {
     { title: "Harvest Hills Farmland", slug: "harvest-hills-farmland", location: "Pollachi, Coimbatore District", district: "Coimbatore", state: "Tamil Nadu", totalAcreage: 200, availableAcreage: 75, soilType: "Red Sandy Loam", topography: "Rolling Hills", fencingStatus: "Stone Wall + Barbed Wire", irrigationType: "Drip Irrigation", waterSource: "3 Bore Wells + Stream Water", waterAvailability: "Year-round with stream", waterQuality: "Excellent natural spring water", electricity: true, roadAccess: true, storageFacility: true, farmHouse: true, infrastructure: "Farm house, storage godown, packaging shed, security", pricePerAcre: 1200000, totalPrice: 1200000, priceNegotiable: false, legalClearTitle: true, documentation: "Clear title, EC, Survey, Patta", registrationStatus: "Ready for registration", farmSetupAssistance: true, plantationSupport: true, irrigationPlanning: true, maintenanceGuidance: true, developmentServices: "Premium farm setup with mango plantation, organic certification, full maintenance support", status: "Available", featuredImage: "/images/harvest-hills.jpg" },
   ];
   for (const land of farmlands) {
-    const existing = await prisma.farmLand.findFirst({ where: { slug: land.slug, brandId: BID } });
+    const existing = await prisma.farmLand.findFirst({ where: { slug: land.slug } });
     if (existing) {
       await prisma.farmLand.update({ where: { id: existing.id }, data: land });
     } else {
-      await prisma.farmLand.create({ data: { ...land, brandId: BID } });
+      await prisma.farmLand.create({ data: land });
     }
   }
   console.log(`Farmlands: ${farmlands.length} (upserted)`);
@@ -330,11 +303,11 @@ async function main() {
     { title: "Organic Cold-Pressed Coconut Oil", slug: "organic-cold-pressed-coconut-oil", shortDesc: "Pure cold-pressed coconut oil from organic coconuts.", fullDesc: "Extracted using traditional cold-press method from organic coconuts grown on our farms. No refining, no chemicals, no heat processing. Pure virgin coconut oil for cooking and wellness.", price: 600, unit: "per litre", minOrder: 1, seasonAvailable: "Year-round", inStock: true, certification: "NPOP Organic Certified", qualityGrade: "Virgin Cold-Pressed", benefits: "Heart-healthy, boosts immunity, good for skin and hair, enhances cooking flavor.", nutritionalInfo: "Per tablespoon: Calories 121, Saturated Fat 12g, MCTs 60%", storageInfo: "Store in cool, dry place. Solidifies below 24°C. Shelf life 18 months." },
   ];
   for (const product of products) {
-    const existing = await prisma.farmProduct.findFirst({ where: { slug: product.slug, brandId: BID } });
+    const existing = await prisma.farmProduct.findFirst({ where: { slug: product.slug } });
     if (existing) {
       await prisma.farmProduct.update({ where: { id: existing.id }, data: product });
     } else {
-      await prisma.farmProduct.create({ data: { ...product, brandId: BID } });
+      await prisma.farmProduct.create({ data: product });
     }
   }
   console.log(`Products: ${products.length} (upserted)`);
@@ -346,17 +319,17 @@ async function main() {
     { name: "Farm Visit & Experience", slug: "farm-visit-experience", shortDesc: "Experience organic farming firsthand with guided farm tours.", fullDesc: "Visit our farms in Coimbatore and experience organic farming firsthand. Walk through our plantations, visit our solar processing unit, and taste fresh organic produce.", icon: "🌾", pricingModel: "Per person", price: 500, duration: "Half day", features: "Guided tour, Plantation walk, Solar unit visit, Fresh produce tasting, Organic lunch", displayOrder: 4, featured: false, showOnHome: true },
   ];
   for (const service of services) {
-    const existing = await prisma.service.findFirst({ where: { slug: service.slug, brandId: BID } });
+    const existing = await prisma.service.findFirst({ where: { slug: service.slug } });
     if (existing) {
       await prisma.service.update({ where: { id: existing.id }, data: service });
     } else {
-      await prisma.service.create({ data: { ...service, brandId: BID } });
+      await prisma.service.create({ data: service });
     }
   }
   console.log(`Services: ${services.length} (upserted)`);
 
   // ============================================================
-  // PART 4: Section Content Items (from seed-section-content.cjs)
+  // PART 4: Section Content Items
   // ============================================================
   console.log("\n--- Part 4: Section Items ---");
 

@@ -23,15 +23,6 @@ export default function LoginPage() {
     if (result?.error) {
       setError("Invalid email or password");
     } else {
-      // Auto-set brandId cookie to default brand
-      try {
-        const res = await fetch("/api/admin/brands");
-        const brands = await res.json();
-        const defaultBrand = Array.isArray(brands) ? brands[0] : null;
-        if (defaultBrand) {
-          document.cookie = `brandId=${defaultBrand.id}; path=/; max-age=31536000`;
-        }
-      } catch {}
       router.push("/admin/dashboard");
     }
   }

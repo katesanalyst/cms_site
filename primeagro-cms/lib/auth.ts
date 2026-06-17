@@ -1,4 +1,4 @@
-import { NextAuthOptions } from "next-auth";
+﻿import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "./prisma";
@@ -30,28 +30,12 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/admin/login" },
   callbacks: {
-    async signIn() {
-      // Auto-set brandId cookie to default brand on every login
-      try {
-        const brand = await prisma.brand.findFirst({ where: { published: true }, orderBy: { createdAt: "asc" } });
-        if (brand) {
-          // Cookie is set via headers in the middleware — see middleware.ts
-        }
-      } catch {}
-      return true;
-    },
     async jwt({ token, user }) {
       if (user) { token.id = user.id; }
-      // Attach default brandId to token
-      if (!token.brandId) {
-        const brand = await prisma.brand.findFirst({ where: { published: true }, orderBy: { createdAt: "asc" } });
-        if (brand) token.brandId = brand.id;
-      }
       return token;
     },
     async session({ session, token }) {
       if (session.user) { session.user.id = token.id as string; }
-      (session as any).brandId = token.brandId as string;
       return session;
     },
   },

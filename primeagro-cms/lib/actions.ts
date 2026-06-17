@@ -1,12 +1,10 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "./prisma";
 import { slugify } from "./utils";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
-import { getBrandIdFromCookie, getBrandIdForAPI } from "./brand-server";
-import { cookies } from "next/headers";
 
 async function requireAuth() {
   const session = await getServerSession(authOptions);
@@ -149,10 +147,6 @@ function adminPath(type: string): string {
 export async function createItem(type: string, formData: FormData) {
   await requireAuth();
   const data = parseFormData(formData);
-  // Inject brandId from cookie if not provided
-  if (!data.brandId) {
-    try { data.brandId = await getBrandIdFromCookie(); } catch {}
-  }
   await models[type].create(data);
   revalidatePath(adminPath(type));
 }
@@ -172,21 +166,17 @@ export async function deleteItem(type: string, id: string) {
 
 export async function updateSettings(data: Record<string, string>) {
   await requireAuth();
-  const cookieStore = await cookies();
-  const brandId = cookieStore.get("brandId")?.value || "";
   for (const [key, value] of Object.entries(data)) {
     await prisma.siteSetting.upsert({
-      where: { brandId_key: { brandId, key } },
+      where: { key },
       update: { value },
-      create: { key, value, brandId },
+      create: { key, value },
     });
   }
   revalidatePath("/admin/settings");
 }
 
 export async function getSettings() {
-  const cookieStore = await cookies();
-  const brandId = cookieStore.get("brandId")?.value || "";
-  const settings = await prisma.siteSetting.findMany({ where: { brandId } });
+  const settings = await prisma.siteSetting.findMany();
   return Object.fromEntries(settings.map((s) => [s.key, s.value]));
 }

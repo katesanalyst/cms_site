@@ -1,24 +1,25 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getBrandIdForAPI } from "@/lib/brand-server";
 
-export async function GET(request: Request) {
+async function checkAuth() {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
+}
+
+export async function GET() {
   try {
-    const brandId = await getBrandIdForAPI(request);
-    const items = await prisma.faq.findMany({ where: { brandId, published: true }, orderBy: { displayOrder: "asc" } });
+    const items = await prisma.faq.findMany({ where: { published: true }, orderBy: { displayOrder: "asc" } });
     return NextResponse.json(items);
   } catch (e) { return NextResponse.json({ error: String(e) }, { status: 500 }); }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) throw new Error("Unauthorized");
-    const brandId = await getBrandIdForAPI(request);
-    const data = await request.json();
-    const item = await prisma.faq.create({ data: { ...data, brandId } });
+    await checkAuth();
+    const data = await req.json();
+    const item = await prisma.faq.create({ data });
     return NextResponse.json(item);
   } catch (e) { return NextResponse.json({ error: String(e) }, { status: 500 }); }
 }

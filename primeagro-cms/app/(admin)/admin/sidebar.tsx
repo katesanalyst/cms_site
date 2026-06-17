@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import BrandSelector from "@/components/admin/BrandSelector";
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: "📊" },
   { divider: true },
-  { label: "Brands", href: "/admin/brands", icon: "🏢" },
   { label: "Pages", href: "/admin/pages", icon: "📄" },
   { label: "Heroes", href: "/admin/heroes", icon: "🎬" },
   { label: "Blog", href: "/admin/blog", icon: "✍️" },
@@ -38,8 +36,6 @@ export default function Sidebar() {
       <div className="p-4 border-b border-green-800">
         <h1 className="text-lg font-bold">🌿 Primeform CMS</h1>
       </div>
-
-      <BrandSelector />
 
       <nav className="flex-1 overflow-y-auto p-2">
         {navItems.map((item, i) => {

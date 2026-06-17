@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+﻿FROM node:20-alpine AS builder
 
 WORKDIR /app
 COPY package.json package-lock.json* ./
@@ -21,9 +21,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
-COPY --from=builder /app/prisma/seed.cjs ./seed.cjs
-COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/seed-all.cjs ./seed-all.cjs
+COPY --from=builder /app/next.config.ts ./next.config.ts
 
 EXPOSE 3334
 
